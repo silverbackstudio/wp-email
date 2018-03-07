@@ -39,8 +39,18 @@ class SendInBlue implements ServiceInterface {
 
 		$sendEmail = $this->compose( $email );
 		
-		if( $email->attributes || $attributes ) {
-			$sendEmail->setAttributes( array_merge( $email->attributes, $attributes ) );		
+		$attributes = array_merge( $email->attributes, $attributes );
+		$uc_attributes = array();
+		$input_attributes = array();		
+		
+		if( ! empty( $attributes ) ) {
+			
+			foreach( $attributes as $key => $value ){
+				$uc_attributes[ strtoupper( $key ) ] = $value;
+				$input_attributes[ strtoupper( 'INPUT_' . $key ) ] = $value;
+			}
+			
+			$sendEmail->setAttributes( array_merge( $attributes, $uc_attributes, $input_attributes ) );		
 		}		
 		
 		try {

@@ -11,7 +11,6 @@ class Contact {
 	
 	public $lists;
 	
-	
 	public function __construct( $properties ){
 		
 		foreach ( $properties as $property => $value ) {
