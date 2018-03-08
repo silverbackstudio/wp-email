@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Svbk\WP\Email\Marketing\Exceptions;
+namespace Svbk\WP\Email\Transactional\Exceptions;
 
 use Exception;
 
