@@ -3,15 +3,17 @@ namespace Svbk\WP\Email;
 
 class Contact {
 
+	public $id;
 	public $first_name;
 	public $last_name;
 	public $email;
+	public $phone;
 	
 	public $attributes = array();
 	
 	public $lists;
 	
-	public function __construct( $properties ){
+	public function __construct( $properties = array() ){
 		
 		foreach ( $properties as $property => $value ) {
 			if ( property_exists( $this, $property ) ) {

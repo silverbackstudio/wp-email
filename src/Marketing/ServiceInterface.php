@@ -11,14 +11,12 @@ use Svbk\WP\Email\Contact;
 
 abstract class ServiceInterface {
 
-	abstract public function create( Contact $contact, $update = true);
+	abstract public function createContact( Contact $contact, $update = true);
 
 	abstract public function listSubscribe( Contact $contact, $lists = array() );
 
 	abstract public function listUnsubscribe( Contact $contact, $lists = array() );
 
-	abstract public function updateAttributes( Contact $contact, $user_attributes = array());
-
-	abstract public function update( Contact $contact, $attributes = array());
+	abstract public function saveContact( Contact $contact, $custom_attributes = array());
 
 }

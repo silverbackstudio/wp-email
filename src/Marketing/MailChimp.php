@@ -7,6 +7,7 @@ use \DrewM\MailChimp\MailChimp as MailChimp_Client;
 
 class MailChimp extends ServiceInterface {
 
+	public $id = 'mailchimp';
 	public $client;
 
 	public function __construct( $api_key ) {
@@ -18,9 +19,9 @@ class MailChimp extends ServiceInterface {
 		$this->client = new MailChimp_Client( $api_key );
 	}
 
-	public function create( Contact $contact, $update = true ) {
+	public function createContact( Contact $contact, $update = true ) {
 
-		$subscriber_hash = $this->client->subscriberHash( $email );
+		$subscriber_hash = $this->client->subscriberHash( $contact->email );
 
 		$user_attributes = $this->attributes;
 		
@@ -38,7 +39,7 @@ class MailChimp extends ServiceInterface {
 
 			if ( ! $this->client->success() ) {
 
-				$result = $this->client->post(
+				$raw_result = $this->client->post(
 					"lists/$list_id/members", 
 					array(
 						'email_address' => $contact->email,
@@ -50,13 +51,24 @@ class MailChimp extends ServiceInterface {
 					)
 				);
 
-				if ( ! $this->client->success() ) {
-					throw new Exceptions\ServiceError( $this->client->getLastError() );
+				if ( $this->client->success() ) {
+					do_action('svbk_email_contact_created', $raw_result, $data, $this );
+					do_action('svbk_email_contact_created_mailchimp', $raw_result, $data, $this );
+				} else {
+					throw new Exceptions\ServiceError( $this->client->getLastError() );	
 				}
+				
 			} elseif ( $update ) {
 
-				$result = $this->update( $contact, $user_attributes, $list_id );
+				$raw_result = $this->saveContact( $contact );
 
+				if ( $this->client->success() ) {
+					do_action('svbk_email_contact_updated', $raw_result, $data, $this );
+					do_action('svbk_email_contact_updated_mailchimp', $raw_result, $data, $this );								
+				} else {
+					throw new Exceptions\ServiceError( $this->client->getLastError() );
+				}
+				
 				if ( ! empty( $contact->lists ) ) {
 					$this->listSubscribe( $contact, $contact->lists );
 				}
@@ -66,13 +78,16 @@ class MailChimp extends ServiceInterface {
 		return $result;
 	}
 
-	public function updateAttributes( Contact $contact ) {
-		$this->update( $email, [ 'merge_fields' => $contact->attributes ] );
-	}
+	public function saveContact( Contact $contact, $custom_attributes = array() ) {
 
-	public function update( Contact $contact, $attributes ) {
+		$subscriber_hash = $this->client->subscriberHash( $contact->email );
 
-		$subscriber_hash = $this->client->subscriberHash( $email );
+		$attributes = $custom_attributes;
+
+		$attributes['FNAME'] = $contact->first_name;
+		$attributes['LNAME'] = $contact->last_name;
+		$attributes['PHONE'] = $contact->phone;
+		$attributes['merge_fields'] = $contact->attributes;
 
 		foreach ( $contact->lists as $list_id ) {
 
@@ -80,18 +95,22 @@ class MailChimp extends ServiceInterface {
 	
 			if ( $this->client->success() ) {
 	
-				$result = $this->client->patch( "lists/$list_id/members/$subscriber_hash", $attributes );
+				$raw_result = $this->client->patch( "lists/$list_id/members/$subscriber_hash", $attributes );
 	
-				if ( ! $this->client->success() ) {
+				if ( $this->client->success() ) {
+					do_action('svbk_email_contact_updated', $raw_result, $data, $this );
+					do_action('svbk_email_contact_updated_mailchimp', $raw_result, $data, $this );								
+				} else {
 					throw new Exceptions\ServiceError( $this->client->getLastError() );
 				}
+				
 			} else {
 				throw new Exceptions\ContactNotExist();
 			}
 			
 		}
 
-		return $result;
+		return $raw_result;
 	}
 
 	public function listSubscribe( Contact $contact, $lists ) {
