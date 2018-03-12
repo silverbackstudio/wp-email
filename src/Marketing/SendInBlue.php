@@ -51,7 +51,7 @@ class SendInBlue extends ServiceInterface {
 
 		try {
 			$existing_contact = $this->getContact( $contact );
-		} catch ( Exceptions\ContactNotExist $e ) {	
+		} catch ( Exceptions\ContactNotExists $e ) {	
 			$existing_contact =  false;
 		}
 		
@@ -90,7 +90,7 @@ class SendInBlue extends ServiceInterface {
 			$error = $e->getResponseBody();
 			
 			if( 'document_not_found' === $error->code ) {
-				throw new Exceptions\ContactNotExist();
+				throw new Exceptions\ContactNotExists();
 			}
 			
 			throw new Exceptions\ServiceError( $e->getResponseBody()->message );
@@ -149,7 +149,7 @@ class SendInBlue extends ServiceInterface {
 			$error = $e->getResponseBody();
 			
 			if( 'document_not_found' === $error->code ) {
-				throw new Exceptions\ContactNotExist();
+				throw new Exceptions\ContactNotExists();
 			}			
 			
 			throw new Exceptions\ServiceError( $e->getResponseBody()->message );

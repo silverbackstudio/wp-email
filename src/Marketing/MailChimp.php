@@ -105,7 +105,7 @@ class MailChimp extends ServiceInterface {
 				}
 				
 			} else {
-				throw new Exceptions\ContactNotExist();
+				throw new Exceptions\ContactNotExists();
 			}
 			
 		}
@@ -139,7 +139,7 @@ class MailChimp extends ServiceInterface {
 				}
 				
 			} else {
-				throw new Exceptions\ContactNotExist();
+				throw new Exceptions\ContactNotExists();
 			}
 		}
 
@@ -172,7 +172,7 @@ class MailChimp extends ServiceInterface {
 				}
 				
 			} else {
-				throw new Exceptions\ContactNotExist();
+				throw new Exceptions\ContactNotExists();
 			}
 		}
 

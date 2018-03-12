@@ -5,7 +5,7 @@ namespace Svbk\WP\Email\Marketing\Exceptions;
 
 use Exception;
 
-class ContactNotExist extends Exception {
+class ContactNotExists extends Exception {
 
 	public function __construct( $message = null, $code = 0, Exception $previous = null ) {
 
