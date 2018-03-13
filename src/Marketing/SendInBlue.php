@@ -33,6 +33,14 @@ class SendInBlue extends ServiceInterface {
 		$this->client_contacts = new SendInBlue_Client\Api\ContactsApi( $this->client );
 	}
 
+	public static function remove_plugin_script(){
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'dequeue_plugin_script' ), 1000 );
+	}
+
+	public static function dequeue_plugin_script(){
+		wp_dequeue_script( 'sib-front-js' );
+	}
+
 	public function createContact( Contact $contact ) {
 
 		$data = $this->parseContact( $contact );
