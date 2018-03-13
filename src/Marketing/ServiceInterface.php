@@ -11,7 +11,7 @@ use Svbk\WP\Email\Contact;
 
 abstract class ServiceInterface {
 
-	abstract public function createContact( Contact $contact, $update = true);
+	abstract public function createContact( Contact $contact );
 
 	abstract public function listSubscribe( Contact $contact, $lists = array() );
 

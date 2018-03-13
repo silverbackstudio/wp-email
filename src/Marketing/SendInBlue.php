@@ -33,7 +33,7 @@ class SendInBlue extends ServiceInterface {
 		$this->client_contacts = new SendInBlue_Client\Api\ContactsApi( $this->client );
 	}
 
-	public function createContact( Contact $contact, $update = true ) {
+	public function createContact( Contact $contact ) {
 
 		$data = $this->parseContact( $contact );
 
@@ -41,41 +41,35 @@ class SendInBlue extends ServiceInterface {
 			$data['email']= $contact->email;
 		}
 
-		$data['updateEnabled'] = $update;
-		
+		$data['updateEnabled'] = false;
+
 		$createContact = new SendInBlue_Client\Model\CreateContact( $data );
 
 		if ( ! empty( $contact->lists ) ) {
 			$createContact->setListIds( $contact->lists );
 		}
 
-		try {
-			$existing_contact = $this->getContact( $contact );
-		} catch ( Exceptions\ContactNotExists $e ) {	
-			$existing_contact =  false;
-		}
-		
-		try {
-			if( $update && ( false !== $existing_contact ) ) {
-				$raw_result = $this->saveContact( $contact );
-			} else {
-				$raw_result = $this->client_contacts->createContact( $createContact );
-			}
+		try {				
+
+			$raw_result = $this->client_contacts->createContact( $createContact );
+			
 		} catch ( SendInBlue_Client\ApiException $e ) {
+			
+			$error = $e->getResponseBody();
+			
+			if( 'duplicate_parameter' === $error->code ) {
+				throw new Exceptions\ContactAlreadyExists( null, 0, $e );
+			}			
+			
 			throw new Exceptions\ServiceError( $e->getResponseBody()->message );
 		} catch ( Exception $e ) {
 			throw new Exceptions\ServiceError( $e->getMessage() );
 		}
-		
-		if( empty( $raw_result->id ) ) {
-			$existing_contact = $this->getContact( $contact );
-			$user_id = $existing_contact->id;
-		} else {
-			$user_id = $raw_result->id;	
-		}
-		
+
+		$user_id = empty( $raw_result->id ) ? null : $raw_result->getId();
+					
 		do_action('svbk_email_contact_created', $user_id, $raw_result, $data, $this );
-		do_action('svbk_email_contact_created_sendinblue', $user_id, $raw_result, $data, $this );		
+		do_action('svbk_email_contact_created_sendinblue', $user_id, $raw_result, $data, $this );					
 
 		return $user_id;
 	}
@@ -134,8 +128,8 @@ class SendInBlue extends ServiceInterface {
 
 		$data = $this->parseContact( $contact );
 		
-		if( !empty( $user_attributes ) ) {
-			$updateContact->setAttributes( $user_attributes );
+		if( !empty( $data ) ) {
+			$updateContact->setAttributes( $data['attributes'] );
 		}
 		
 		if ( ! empty( $contact->lists ) ) {
@@ -167,12 +161,12 @@ class SendInBlue extends ServiceInterface {
 			$data['attributes'] = $contact->attributes;
 		}
 
-		if( $contact->first_name ) {
-			$data['attributes'][$this->name_attribute] = $contact->first_name;
+		if( $contact->first_name() ) {
+			$data['attributes'][$this->name_attribute] = $contact->first_name();
 		}
 		
-		if( $contact->last_name ){
-			$data['attributes']['SURNAME'] = $contact->last_name;
+		if( $contact->last_name() ){
+			$data['attributes']['SURNAME'] = $contact->last_name();
 		}
 
 		if( $contact->phone ) {

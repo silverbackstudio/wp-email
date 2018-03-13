@@ -19,7 +19,7 @@ class MailChimp extends ServiceInterface {
 		$this->client = new MailChimp_Client( $api_key );
 	}
 
-	public function createContact( Contact $contact, $update = true ) {
+	public function createContact( Contact $contact ) {
 
 		$subscriber_hash = $this->client->subscriberHash( $contact->email );
 
@@ -35,45 +35,26 @@ class MailChimp extends ServiceInterface {
 
 		foreach ( $contact->lists as $list_id ) {
 
-			$user_info = $this->client->get( "lists/$list_id/members/$subscriber_hash" );
+			$raw_result = $this->client->post(
+				"lists/$list_id/members", 
+				array(
+					'email_address' => $contact->email,
+					'status'        => 'subscribed',
+					'ip_signup'     => $_SERVER['REMOTE_ADDR'],
+					'ip_opt'        => $_SERVER['REMOTE_ADDR'],
+					'language'      => substr( get_locale(), 0, 2 ),
+					'merge_fields' => $user_attributes,
+				)
+			);
 
-			if ( ! $this->client->success() ) {
-
-				$raw_result = $this->client->post(
-					"lists/$list_id/members", 
-					array(
-						'email_address' => $contact->email,
-						'status'        => 'subscribed',
-						'ip_signup'     => $_SERVER['REMOTE_ADDR'],
-						'ip_opt'        => $_SERVER['REMOTE_ADDR'],
-						'language'      => substr( get_locale(), 0, 2 ),
-						'merge_fields' => $user_attributes,
-					)
-				);
-
-				if ( $this->client->success() ) {
-					do_action('svbk_email_contact_created', $raw_result, $data, $this );
-					do_action('svbk_email_contact_created_mailchimp', $raw_result, $data, $this );
-				} else {
-					throw new Exceptions\ServiceError( $this->client->getLastError() );	
-				}
-				
-			} elseif ( $update ) {
-
-				$raw_result = $this->saveContact( $contact );
-
-				if ( $this->client->success() ) {
-					do_action('svbk_email_contact_updated', $raw_result, $data, $this );
-					do_action('svbk_email_contact_updated_mailchimp', $raw_result, $data, $this );								
-				} else {
-					throw new Exceptions\ServiceError( $this->client->getLastError() );
-				}
-				
-				if ( ! empty( $contact->lists ) ) {
-					$this->listSubscribe( $contact, $contact->lists );
-				}
+			if ( $this->client->success() ) {
+				do_action('svbk_email_contact_created', $raw_result, $data, $this );
+				do_action('svbk_email_contact_created_mailchimp', $raw_result, $data, $this );
+			} else {
+				throw new Exceptions\ContactAlreadyExists( $this->client->getLastError() );	
 			}
-		}
+			
+		} 
 
 		return $result;
 	}
