@@ -37,7 +37,23 @@ class SendInBlue implements ServiceInterface {
 
 	public function sendTemplate( $email, $template, $attributes = array() ) {
 
-		$sendEmail = $this->compose( $email );
+		$sendEmail = new SendInBlue_Client\Model\SendEmail();
+		
+		if( $email->to ) { 
+			$sendEmail->setEmailTo( array( $email->to->email ) );
+		}
+	
+		if( $email->cc ) {
+			$sendEmail->setEmailCc( array( $email->cc->email ) );
+		}		
+		
+		if( $email->bcc ) {
+			$sendEmail->setEmailBcc( array( $email->bcc->email ) );
+		}
+
+		if ( $email->reply_to ) {
+			$sendEmail->setReplyTo( $email->reply_to->email );
+		}
 		
 		$attributes = array_merge( $email->attributes, $attributes );
 		$uc_attributes = array();
@@ -65,13 +81,45 @@ class SendInBlue implements ServiceInterface {
 
 	public function send( $email ) {
 
-		$sendEmail = $this->compose( $email );
+		$sendEmail = new SendInBlue_Client\Model\SendSmtpEmail();
 		
-		$sendEmail->setSender( $email->from );
-		$sendEmail->setSubject( $email->subject );
-		$sendEmail->htmlContent( $email->html_body );
-		$sendEmail->textContent( $email->text_body );
+		if( $email->to ) { 
+			$emailTo = new SendinBlue_Client\Model\SendSmtpEmailTo();
+			$emailTo->setEmail( $email->to->email );
+			$emailTo->setName( $email->to->name() ?: null );
+			$sendEmail->setTo( array( $emailTo ) );
+		}
+		
+		if( $email->cc ) {
+			$emailCc = new SendinBlue_Client\Model\SendSmtpEmailCc();
+			$emailCc->setEmail( $email->cc->email );
+			$emailCc->setName( $email->cc->name() ?: null  );
+			$sendEmail->setCc( array( $emailCc ) );
+		}		
+		
+		if( $email->bcc ) {
+			$emailBcc = new SendinBlue_Client\Model\SendSmtpEmailBcc();
+			$emailBcc->setEmail( $email->bcc->email );
+			$emailBcc->setName( $email->bcc->name() ?: null );
+			$sendEmail->setBcc( array( $emailBcc ) );
+		}
 
+		if ( $email->reply_to ) {
+			$emailReplyTo = new SendinBlue_Client\Model\SendSmtpEmailReplyTo();
+			$emailReplyTo->setEmail( $email->reply_to->email );
+			$emailReplyTo->setName( $email->reply_to->name() ?: null  );
+			$sendEmail->setReplyTo( $emailReplyTo );
+		}
+		
+		$sender = new SendInBlue_Client\Model\SendSmtpEmailSender();
+		$sender->setEmail( $email->from->email );
+		$sender->setName( $email->from->name() ?: null );
+		
+		$sendEmail->setSender( $sender );
+		$sendEmail->setSubject( $email->subject );
+		$sendEmail->setHtmlContent( $email->html_body );
+		$sendEmail->setTextContent( $email->text_body );
+		
 		try {
 			$result = $this->smtp_client->sendTransacEmail( $sendEmail );
 		} catch ( SendInBlue_Client\ApiException $e ) {
@@ -80,30 +128,6 @@ class SendInBlue implements ServiceInterface {
 			throw new Exceptions\ServiceError( $e->getMessage() );
 		}
 
-	}
-	
-	public function compose( $email ){
-		
-		$sendEmail = new SendInBlue_Client\Model\SendEmail();
-		
-		if( $email->to ) { 
-			$sendEmail->setEmailTo( array( $email->to->email ) );
-		}
-	
-		if( $email->cc ) {
-			$sendEmail->setEmailCc( array( $email->cc->email ) );
-		}		
-		
-		if( $email->bcc ) {
-			$sendEmail->setEmailBcc( array( $email->bcc->email ) );
-		}
-
-		if ( $email->reply_to ) {
-			$sendEmail->setReplyTo( $email->reply_to->email );
-		}
-		
-		return $sendEmail;
-		
 	}
 
 }
