@@ -23,7 +23,7 @@ class MailChimp extends ServiceInterface {
 
 		$subscriber_hash = $this->client->subscriberHash( $contact->email );
 
-		$user_attributes = $this->attributes;
+		$user_attributes = $contact->attributes;
 		
 		if( $contact->first_name ) {
 			$user_attributes['FNAME'] = $contact->first_name;
@@ -48,15 +48,17 @@ class MailChimp extends ServiceInterface {
 			);
 
 			if ( $this->client->success() ) {
-				do_action('svbk_email_contact_created', $raw_result, $data, $this );
-				do_action('svbk_email_contact_created_mailchimp', $raw_result, $data, $this );
+				do_action('svbk_email_contact_created', $raw_result, $user_attributes, $this );
+				do_action('svbk_email_contact_created_mailchimp', $raw_result, $user_attributes, $this );
 			} else {
 				throw new Exceptions\ContactAlreadyExists( $this->client->getLastError() );	
 			}
 			
 		} 
-
-		return $result;
+		
+		if( isset($raw_result['id']) ) {
+			return $raw_result['id'];
+		}
 	}
 
 	public function saveContact( Contact $contact, $custom_attributes = array() ) {
@@ -79,8 +81,8 @@ class MailChimp extends ServiceInterface {
 				$raw_result = $this->client->patch( "lists/$list_id/members/$subscriber_hash", $attributes );
 	
 				if ( $this->client->success() ) {
-					do_action('svbk_email_contact_updated', $raw_result, $data, $this );
-					do_action('svbk_email_contact_updated_mailchimp', $raw_result, $data, $this );								
+					do_action('svbk_email_contact_updated', $raw_result, $attributes, $this );
+					do_action('svbk_email_contact_updated_mailchimp', $raw_result, $attributes, $this );								
 				} else {
 					throw new Exceptions\ServiceError( $this->client->getLastError() );
 				}
@@ -94,7 +96,7 @@ class MailChimp extends ServiceInterface {
 		return $raw_result;
 	}
 
-	public function listSubscribe( Contact $contact, $lists ) {
+	public function listSubscribe( Contact $contact, $lists = array() ) {
 
 		$results = array();
 		$args = array();
@@ -127,7 +129,7 @@ class MailChimp extends ServiceInterface {
 		return $results;
 	}
 
-	public function listUnsubscribe( Contact $contact, $lists ) {
+	public function listUnsubscribe( Contact $contact, $lists = array() ) {
 
 		$results = array();
 		$args = array();

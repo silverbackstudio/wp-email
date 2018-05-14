@@ -159,6 +159,8 @@ class SendInBlue extends ServiceInterface {
 			throw new Exceptions\ServiceError( $e->getMessage() );
 		}
 
+		return true;
+
 	}
 	
 	protected function parseContact( Contact $contact ){

@@ -10,31 +10,50 @@ class Mandrill implements ServiceInterface {
 
 	public $name = 'mandrill';
 
-	public $api_key;
 	public $client;
 	
 	const TEMPLATE_SUPPORT = true;
 
-	public function __contruct() {
-		$this->client = new Mandrill_Client( $this->api_key );
+	public function __construct( $api_key ) {
+		$this->setApiKey( $api_key );
 	}
+	
+	public function setApiKey( $api_key ) {
+		
+		if( empty( $api_key ) ){
+			throw new Exceptions\ApiKeyInvalid();
+		}		
+		
+		$this->client = new Mandrill_Client( $api_key );
+	}	
 
-	public function sendTemplate( Message $email, $template, $attributes = array() ) {
+	public function sendTemplate( $message, $template, $attributes = array() ) {
 
-		$params = $this->messageParams( $email );
+		$params = $this->messageParams( $message );
 
-		if ( $email->attributes ) {
-			$params['global_merge_vars'] = self::castMergeTags( $email->attributes );
+		$attributes = array_merge( $message->attributes, $attributes );
+		$uc_attributes = array();
+		$input_attributes = array();		
+		
+		if( ! empty( $attributes ) ) {
+			
+			foreach( $attributes as $key => $value ){
+				$uc_attributes[ strtoupper( $key ) ] = $value;
+				$input_attributes[ strtoupper( 'INPUT_' . $key ) ] = $value;
+			}
+			
+			$params['global_merge_vars'] = self::castMergeTags( array_merge( $attributes, $uc_attributes, $input_attributes ) );
 			$params['merge'] = true;
 		}
 
 		try {
+			
 			$results = $this->client->messages->sendTemplate( $template, array(), $params );
 
 			if ( ! is_array( $results ) || ! isset( $results[0]['status'] ) ) {
 				throw new Exceptions\ServiceError( __( 'The requesto to our mail server failed, please try again later or contact the site owner.', 'svbk-email-services' ) );
 			}
-
+			
 			$this->throwErrors( $results );
 
 		} catch ( Mandrill_Error $e ) {
@@ -43,60 +62,63 @@ class Mandrill implements ServiceInterface {
 
 	}
 
-	protected function messageParams( Message $email ) {
+	protected function messageParams( $message ) {
 
 		$params = array();
 
-		if ( $email->subject ) {
-			$params['subject'] = $email->subject;
+		if ( $message->subject ) {
+			$params['subject'] = $message->subject;
 		}
 
-		if ( $email->to ) {
+		if ( $message->to ) {
 			$params['to'][] = array(
-				'email' => trim( $email->to ),
+				'name' => $message->to->name(),
+				'email' => $message->to->email,
 				'type' => 'to',
 			);
 		}
 
-		if ( $email->from ) {
-			$params['from_email'] = $email->from;
+		if ( $message->from ) {
+			$params['from_email'] = $message->from->email;
 		}
 
-		if ( $email->cc ) {
+		if ( $message->cc ) {
 			$params['to'][] = array(
-				'email' => trim( $email->cc ),
+				'name' => $message->cc->name(),
+				'email' => $message->cc->email,
 				'type' => 'cc',
 			);
 		}
 
-		if ( $email->bcc ) {
+		if ( $message->bcc ) {
 			$params['to'][] = array(
-				'email' => trim( $email->bcc ),
+				'name' => $message->bcc->name(),
+				'email' => $message->bcc->email,
 				'type' => 'bcc',
 			);
 		}
 
-		if ( $email->reply_to ) {
-			$params['headers']['Reply-To'] = $email->reply_to;
+		if ( $message->reply_to ) {
+			$params['headers']['Reply-To'] = $message->reply_to->emailAddress();
 		}
 
-		if ( $email->tags ) {
-			$params['tags'] = $email->tags;
+		if ( $message->tags ) {
+			$params['tags'] = $message->tags;
 		}
 
-		return apply_filters( 'svbk_mailing_mandrill_message_params', $params, $email, $this );
+		return apply_filters( 'svbk_mailing_mandrill_message_params', $params, $message, $this );
 	}
 
-	public function send( Message $email ) {
+	public function send( $message ) {
 
-		$params = $this->messageParams( $email );
+		$params = $this->messageParams( $message );
 
-		if ( $email->html_body ) {
-			$params['html'] = $email->html_body;
+		if ( $message->html_body ) {
+			$params['html'] = $message->html_body;
 		}
 
-		if ( $email->text_body ) {
-			$params['text'] = $email->text_body;
+		if ( $message->text_body ) {
+			$params['text'] = $message->text_body;
 		}
 
 		try {
@@ -123,7 +145,7 @@ class Mandrill implements ServiceInterface {
 			);
 		}
 
-		return $inputData;
+		return $data;
 	}
 	
 	public function throwErrors( $results ) {
