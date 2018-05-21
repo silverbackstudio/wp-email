@@ -25,12 +25,12 @@ class MailChimp extends ServiceInterface {
 
 		$user_attributes = $contact->attributes;
 		
-		if( $contact->first_name ) {
-			$user_attributes['FNAME'] = $contact->first_name;
+		if( $contact->first_name() ) {
+			$user_attributes['FNAME'] = $contact->first_name();
 		}
 		
-		if( $contact->last_name ) {
-			$user_attributes['LNAME'] = $contact->last_name;
+		if( $contact->last_name() ) {
+			$user_attributes['LNAME'] = $contact->last_name();
 		}
 
 		foreach ( $contact->lists as $list_id ) {
