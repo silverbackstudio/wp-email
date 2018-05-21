@@ -43,15 +43,17 @@ class SendInBlue extends ServiceInterface {
 
 	public function createContact( Contact $contact ) {
 
-		$data = $this->parseContact( $contact );
+		$contact_attributes = $this->parseContact( $contact );
 
 		if( $contact->email ) {
-			$data['email']= $contact->email;
+			$contact_attributes['email']= $contact->email;
 		}
 
-		$data['updateEnabled'] = false;
+		$contact_attributes['updateEnabled'] = false;
 
-		$createContact = new SendInBlue_Client\Model\CreateContact( $data );
+		$contact_attributes = apply_filters( 'svbk_email_contact_create_sendinblue_attributes', $contact_attributes, $contact, $contact->lists, $this );
+
+		$createContact = new SendInBlue_Client\Model\CreateContact( $contact_attributes );
 
 		if ( ! empty( $contact->lists ) ) {
 			$createContact->setListIds( $contact->lists );
@@ -76,8 +78,8 @@ class SendInBlue extends ServiceInterface {
 
 		$user_id = empty( $raw_result->id ) ? null : $raw_result->getId();
 					
-		do_action('svbk_email_contact_created', $user_id, $raw_result, $data, $this );
-		do_action('svbk_email_contact_created_sendinblue', $user_id, $raw_result, $data, $this );					
+		do_action('svbk_email_contact_created', $user_id, $raw_result, $contact_attributes, $this );
+		do_action('svbk_email_contact_created_sendinblue', $user_id, $raw_result, $contact_attributes, $this );					
 
 		return $user_id;
 	}

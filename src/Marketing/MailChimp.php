@@ -3,6 +3,7 @@
 namespace Svbk\WP\Email\Marketing;
 
 use Svbk\WP\Email\Contact;
+use Svbk\WP\Email\Utils;
 use \DrewM\MailChimp\MailChimp as MailChimp_Client;
 
 class MailChimp extends ServiceInterface {
@@ -35,17 +36,18 @@ class MailChimp extends ServiceInterface {
 
 		foreach ( $contact->lists as $list_id ) {
 
-			$raw_result = $this->client->post(
-				"lists/$list_id/members", 
-				array(
-					'email_address' => $contact->email,
-					'status'        => 'subscribed',
-					'ip_signup'     => $_SERVER['REMOTE_ADDR'],
-					'ip_opt'        => $_SERVER['REMOTE_ADDR'],
-					'language'      => substr( get_locale(), 0, 2 ),
-					'merge_fields' => $user_attributes,
-				)
+			$mc_attributes = array(
+				'email_address' => $contact->email,
+				'status'        => 'subscribed',
+				'ip_signup'     => $_SERVER['REMOTE_ADDR'],
+				'ip_opt'        => $_SERVER['REMOTE_ADDR'],
+				'language'      => substr( get_locale(), 0, 2 ),
+				'merge_fields' => Utils::upperKeys( array_filter( $user_attributes ) ),
 			);
+
+			$mc_attributes = apply_filters( 'svbk_email_contact_create_mailchimp_attributes', $mc_attributes, $contact, $list_id, $this );
+
+			$raw_result = $this->client->post( "lists/$list_id/members", $mc_attributes	);
 
 			if ( $this->client->success() ) {
 				do_action('svbk_email_contact_created', $raw_result, $user_attributes, $this );
@@ -66,11 +68,19 @@ class MailChimp extends ServiceInterface {
 		$subscriber_hash = $this->client->subscriberHash( $contact->email );
 
 		$attributes = $custom_attributes;
+		$attributes['merge_fields'] = Utils::upperKeys( array_filter( $contact->attributes ) ) ;
 
-		$attributes['FNAME'] = $contact->first_name;
-		$attributes['LNAME'] = $contact->last_name;
-		$attributes['PHONE'] = $contact->phone;
-		$attributes['merge_fields'] = $contact->attributes;
+		if( $contact->first_name() ) {
+			$attributes['merge_fields']['FNAME'] = $contact->first_name();
+		}
+		
+		if( $contact->last_name() ) {
+			$attributes['merge_fields']['LNAME'] = $contact->last_name();
+		}
+		
+		if(	$contact->phone ) {
+			$attributes['PHONE'] = $contact->phone;
+		}
 
 		foreach ( $contact->lists as $list_id ) {
 
