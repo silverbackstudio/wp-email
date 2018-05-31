@@ -17,7 +17,7 @@ class SendInBlue implements ServiceInterface {
 	public function __construct( $api_key = null ) {
 		
 		if( $api_key ) {
-			$this->config = new SendInBlue_Client\Client\Configuration;
+			$this->config = new SendInBlue_Client\Configuration;
 			$this->config->setApiKey( 'api-key', $api_key );
 		} else {
 			$this->config = SendInBlue_Client\Configuration::getDefaultConfiguration();
