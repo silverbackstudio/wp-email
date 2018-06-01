@@ -16,6 +16,8 @@ class SendInBlue extends ServiceInterface {
 	
 	public $name_attribute = 'NOME';
 
+	const DATE_FORMAT = 'Y-m-d';
+
 	public function __construct( $api_key = null ) {
 		
 		if( $api_key ) {
@@ -221,6 +223,30 @@ class SendInBlue extends ServiceInterface {
 		
 		return $contact;
 		
+	}
+	
+	public function getLists( $limit = 10, $offset = 0 ) {
+		
+		$cache_key = 'svbk_email_sendinblue_lists_' . $limit . '_' . $offset; 
+		
+		$lists = get_transient( $cache_key );
+		
+		if ( false === $lists ) {
+			
+			try {
+			
+				$list_client = new SendInBlue_Client\Api\ListsApi( $this->client );
+				$list_result = $list_client->getLists($limit, $offset);
+			
+			} catch (Exception $e) {
+			    return false;
+			}				
+			
+			$lists = wp_list_pluck( $list_result->getLists(), 'name', 'id' );
+			set_transient( $cache_key, $lists, 1 * MINUTE_IN_SECONDS );	
+		}		
+		
+		return $lists;
 	}
 	
 }
