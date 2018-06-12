@@ -21,6 +21,7 @@ class Mandrill implements ServiceInterface {
 	public function setApiKey( $api_key ) {
 		
 		if( empty( $api_key ) ){
+			do_action( 'log', 'critical', 'Missing Mandrill API key' );
 			throw new Exceptions\ApiKeyInvalid();
 		}		
 		
@@ -28,7 +29,6 @@ class Mandrill implements ServiceInterface {
 	}	
 
 	public function sendTemplate( $message, $template, $attributes = array() ) {
-
 		$params = $this->messageParams( $message );
 
 		$attributes = array_merge( $message->attributes, $attributes );
@@ -48,15 +48,33 @@ class Mandrill implements ServiceInterface {
 
 		try {
 			
+			do_action( 'log', 'debug', 'Mandrill sendTemplate() invoked', 
+				array(  'template' => $template, 'params' => $params ) ) 
+			);			
+			
 			$results = $this->client->messages->sendTemplate( $template, array(), $params );
 
 			if ( ! is_array( $results ) || ! isset( $results[0]['status'] ) ) {
+				
+				do_action( 'log', 'error', 'Mandrill sendTemplate() API request invalid response', 
+					array( 'error' => $results ) 
+				);
+				
 				throw new Exceptions\ServiceError( __( 'The requesto to our mail server failed, please try again later or contact the site owner.', 'svbk-email-services' ) );
 			}
 			
 			$this->throwErrors( $results );
+			
+			do_action( 'log', 'info', 'Mandrill sendTempalte() successful', 
+				array( 'results' => $results ) 
+			);				
 
 		} catch ( Mandrill_Error $e ) {
+
+			do_action( 'log', 'error', 'Mandrill sendTemplate() API request error', 
+				array( 'error' => $e->getMessage() ) 
+			);			
+			
 			throw new Exceptions\ServiceError( $e->getMessage() );
 		}
 
@@ -122,15 +140,32 @@ class Mandrill implements ServiceInterface {
 		}
 
 		try {
+			do_action( 'log', 'debug', 'Mandrill send() invoked', 
+				array( 'params' => $params ) 
+			);			
+			
 			$results = $mandrill->messages->send( $params );
 
 			if ( ! is_array( $results ) || ! isset( $results[0]['status'] ) ) {
+				do_action( 'log', 'error', 'Mandrill sendTemplate() API request invalid response', 
+					array( 'error' => $results ) 
+				);				
+				
 				throw new Exceptions\ServiceError( __( 'The requesto to our mail server failed, please try again later or contact the site owner.', 'svbk-email-services' ) );
 			}
 
 			$this->throwErrors( $results );
 
+			do_action( 'log', 'info', 'Mandrill send() successful', 
+				array( 'results' => $results ) 
+			);	
+
 		} catch ( Mandrill_Error $e ) {
+			
+			do_action( 'log', 'error', 'Mandrill sendTemplate() API request error', 
+				array( 'error' => $e->getMessage() ) 
+			);
+			
 			throw new Exceptions\ServiceError( $e->getMessage() );
 		}
 
@@ -184,6 +219,10 @@ class Mandrill implements ServiceInterface {
 						throw new Exceptions\EmailRejectInvalidSender();
 						break;
 					default:
+						do_action( 'log', 'notice', 'Mandrill unmapped reject reason found: {reason}', 
+							array( 'reason' => $result['reject_reason'] ) 
+						);
+												
 						throw new Exceptions\EmailReject( sprintf( __( 'This email address has beeing rejected for an unknown reason [%s]. Please use another email address.', 'svbk-email-services' ), $result['reject_reason'] ) );
 				}
 			}
@@ -191,6 +230,7 @@ class Mandrill implements ServiceInterface {
 			if ( 'invalid' === $result['status'] ) {
 				throw new Exceptions\EmailRejectInvalidAddress();
 			}
+			
 		}
 
 	}

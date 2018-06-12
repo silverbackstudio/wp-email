@@ -24,6 +24,9 @@ class SendInBlue implements ServiceInterface {
 		}
 		
 		if( ! $this->config->getApiKey('api-key') ) {
+			
+			do_action( 'log', 'critical', 'Missing Sendinblue API key');
+			
 			throw new Exceptions\ApiKeyInvalid();
 		}
 		
@@ -36,6 +39,10 @@ class SendInBlue implements ServiceInterface {
 	}
 
 	public function sendTemplate( $email, $template, $attributes = array() ) {
+
+		do_action( 'log', 'debug', 'SendinBlue sendTemplate() invoked', 
+			array( 'template' => $template, 'attributes' => $attributes ) 
+		);
 
 		$sendEmail = new SendInBlue_Client\Model\SendEmail();
 		
@@ -72,14 +79,32 @@ class SendInBlue implements ServiceInterface {
 		try {
 			$result = $this->smtp_client->sendTemplate( $template, $sendEmail );
 		} catch ( SendInBlue_Client\ApiException $e ) {
+			
+			do_action( 'log', 'error', 'Sendinblue sendTemplate() API request error', 
+				array( 'error' => $e->getResponseBody() ) 
+			);
+			
 			throw new Exceptions\ServiceError( $e->getResponseBody()->message );			
 		} catch ( Exception $e ) {
+			
+			do_action( 'log', 'error', 'Sendinblue sendTemplate() generic request error',
+				array( 'error' => $e->getMessage() ) 
+			);
+			
 			throw new Exceptions\ServiceError( $e->getMessage() );
 		}
+		
+		do_action( 'log', 'info', 'Sendinblue sendTemplate() successful', 
+			array( 'result' => $result ) 
+		);			
 
 	}
 
 	public function send( $email ) {
+
+		do_action( 'log', 'debug', 'SendinBlue send() invoked', 
+			array( 'email' => $email, 'attributes' => $attributes ) 
+		);
 
 		$sendEmail = new SendInBlue_Client\Model\SendSmtpEmail();
 		
@@ -123,10 +148,26 @@ class SendInBlue implements ServiceInterface {
 		try {
 			$result = $this->smtp_client->sendTransacEmail( $sendEmail );
 		} catch ( SendInBlue_Client\ApiException $e ) {
-			throw new Exceptions\ServiceError( $e->getResponseBody()->message );			
+			
+			do_action( 'log', 'error', 'Sendinblue send() API request error', 
+				array( 'error' => $e->getResponseBody() ) 
+			);
+			
+			throw new Exceptions\ServiceError( $e->getResponseBody()->message );
+			
 		} catch ( Exception $e ) {
+			
+			do_action( 'log', 'error', 'Sendinblue send() generic request error', 
+				array( 'error' => $e->getMessage() ) 
+			);
+			
 			throw new Exceptions\ServiceError( $e->getMessage() );
+			
 		}
+		
+		do_action( 'log', 'info', 'Sendinblue send() successful', 
+			array( 'result' => $result ) 
+		);				
 
 	}
 

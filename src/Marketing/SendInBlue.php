@@ -28,6 +28,7 @@ class SendInBlue extends ServiceInterface {
 		}
 		
 		if( ! $this->config->getApiKey('api-key') ) {
+			do_action( 'log', 'critical', 'Missing Sendinblue API key' );
 			throw new Exceptions\ApiKeyInvalid();
 		}
 		
@@ -55,6 +56,10 @@ class SendInBlue extends ServiceInterface {
 
 		$contact_attributes = apply_filters( 'svbk_email_contact_create_sendinblue_attributes', $contact_attributes, $contact, $contact->lists, $this );
 
+		do_action( 'log', 'debug', 'SendinBlue createContact() invoked', 
+			array( 'attributes' => $contact_attributes )
+		);
+
 		$createContact = new SendInBlue_Client\Model\CreateContact( $contact_attributes );
 
 		if ( ! empty( $contact->lists ) ) {
@@ -70,24 +75,43 @@ class SendInBlue extends ServiceInterface {
 			$error = $e->getResponseBody();
 			
 			if( 'duplicate_parameter' === $error->code ) {
+				do_action( 'log', 'notice', 'Sendinblue createContact() API duplicate contact found' );		
+						
 				throw new Exceptions\ContactAlreadyExists( null, 0, $e );
 			}			
 			
+			do_action( 'log', 'error', 'Sendinblue createContact() API request error', 
+				array( 'error' => $error ) 
+			);			
+			
 			throw new Exceptions\ServiceError( $e->getResponseBody()->message );
 		} catch ( Exception $e ) {
+			
+			do_action( 'log', 'error', 'Sendinblue createContact() API request general error', 
+				array( 'error' => $e->getMessage() ) 
+			);				
+			
 			throw new Exceptions\ServiceError( $e->getMessage() );
 		}
-
+		
 		$user_id = empty( $raw_result->id ) ? null : $raw_result->getId();
 					
 		do_action('svbk_email_contact_created', $user_id, $raw_result, $contact_attributes, $this );
 		do_action('svbk_email_contact_created_sendinblue', $user_id, $raw_result, $contact_attributes, $this );					
+
+		do_action( 'log', 'info', 'Sendinblue createContact() successful', 
+			array( 'result' => $raw_result ) 
+		);				
 
 		return $user_id;
 	}
 
 
 	public function getContact( $search_contact ){
+		
+		do_action( 'log', 'debug', 'SendinBlue createContact() invoked', 
+			array( 'email' => $search_contact->email )
+		);		
 		
 		try {
 			$raw_result = $this->client_contacts->getContactInfo( $search_contact->email );
@@ -96,14 +120,29 @@ class SendInBlue extends ServiceInterface {
 			$error = $e->getResponseBody();
 			
 			if( 'document_not_found' === $error->code ) {
+				do_action( 'log', 'notice', 'Sendinblue getContact() API contact not found',
+					array( 'contact' => $contact )
+				);		
 				throw new Exceptions\ContactNotExists();
 			}
+			
+			do_action( 'log', 'error', 'Sendinblue getContact() API request error', 
+				array( 'error' => $error ) 
+			);				
 			
 			throw new Exceptions\ServiceError( $e->getResponseBody()->message );
 			
 		} catch ( Exception $e ) {
+			do_action( 'log', 'error', 'Sendinblue getContact() API request general error', 
+				array( 'error' => $e->getMessage() ) 
+			);			
+			
 			throw new Exceptions\ServiceError( $e->getMessage() );
 		}
+	
+		do_action( 'log', 'info', 'Sendinblue getContact() API request successful', 
+			array( 'result' => $raw_result ) 
+		);		
 	
 		return $this->castContact( $raw_result );
 	}
@@ -148,20 +187,40 @@ class SendInBlue extends ServiceInterface {
 			$updateContact->setListIds( $contact->lists );
 		}
 		
+		do_action( 'log', 'debug', 'SendinBlue saveContact() invoked', 
+			array( 'contact' => $contact )
+		);		
+		
 		try {
-			$result = $this->client_contacts->updateContact( $contact->email, $updateContact );
+			$raw_result = $this->client_contacts->updateContact( $contact->email, $updateContact );
 		} catch ( SendInBlue_Client\ApiException $e ) {
 			
 			$error = $e->getResponseBody();
 			
 			if( 'document_not_found' === $error->code ) {
+				do_action( 'log', 'notice', 'Sendinblue saveContact() API contact not found',
+					array( 'contact' => $contact )
+				);		
 				throw new Exceptions\ContactNotExists();
 			}			
 			
+			do_action( 'log', 'error', 'Sendinblue saveContact() API request error', 
+				array( 'error' => $error ) 
+			);	
+			
 			throw new Exceptions\ServiceError( $e->getResponseBody()->message );
 		} catch ( Exception $e ) {
+			
+			do_action( 'log', 'error', 'Sendinblue saveContact() API request general error', 
+				array( 'error' => $e->getMessage() ) 
+			);				
+			
 			throw new Exceptions\ServiceError( $e->getMessage() );
 		}
+		
+		do_action( 'log', 'info', 'Sendinblue saveContact() API request successful', 
+			array( 'result' => $raw_result ) 
+		);	
 
 		return true;
 
@@ -234,17 +293,33 @@ class SendInBlue extends ServiceInterface {
 		if ( false === $lists ) {
 			
 			try {
+		
+				do_action( 'log', 'debug', 'SendinBlue getLists() invoked' );	
 			
 				$list_client = new SendInBlue_Client\Api\ListsApi( $this->client );
 				$list_result = $list_client->getLists($limit, $offset);
 			
 			} catch (Exception $e) {
+				
+				do_action( 'log', 'error', 'SendinBlue getLists() request error',
+					array( 'error' => $e->getMessage() )
+				);
+				
 			    return false;
 			}				
 			
 			$lists = wp_list_pluck( $list_result->getLists(), 'name', 'id' );
+			
+			do_action( 'log', 'info', 'SendinBlue getLists() successful retreive',
+				array( 'result' => $list_result ) 
+			);			
+			
 			set_transient( $cache_key, $lists, 1 * MINUTE_IN_SECONDS );	
-		}		
+		} else {
+			do_action( 'log', 'debug', 'SendinBlue getLists() loaded from cache', 
+				array( 'lists' => $lists ) 
+			);
+		}
 		
 		return $lists;
 	}
