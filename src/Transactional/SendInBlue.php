@@ -103,7 +103,7 @@ class SendInBlue implements ServiceInterface {
 	public function send( $email ) {
 
 		do_action( 'log', 'debug', 'SendinBlue send() invoked', 
-			array( 'email' => $email, 'attributes' => $attributes ) 
+			array( 'email' => $email ) 
 		);
 
 		$sendEmail = new SendInBlue_Client\Model\SendSmtpEmail();
