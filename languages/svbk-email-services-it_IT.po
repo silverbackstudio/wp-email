@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Silverback Helpers\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-06 16:11+0000\n"
-"PO-Revision-Date: 2018-03-06 16:12+0000\n"
+"POT-Creation-Date: 2018-06-21 14:12+0000\n"
+"PO-Revision-Date: 2018-06-21 14:13+0000\n"
 "Last-Translator: SilverbackStudio <webmaster@silverbackstudio.it>\n"
 "Language-Team: Italian\n"
 "Language: it_IT\n"
@@ -13,8 +13,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Loco https://localise.biz/"
 
-#: ../../../../vendor/silverbackstudio/wp-email/src/Transactional/Mandrill.php:35
-#: ../../../../vendor/silverbackstudio/wp-email/src/Transactional/Mandrill.php:106
+#: src/Transactional/Mandrill.php:63 src/Transactional/Mandrill.php:154
 msgid ""
 "The requesto to our mail server failed, please try again later or contact "
 "the site owner."
@@ -22,7 +21,7 @@ msgstr ""
 "La richiesta di invio non è andata a buon fine, per favore riprova più tardi "
 "o contatta il proprietario del sito."
 
-#: ../../../../vendor/silverbackstudio/wp-email/src/Transactional/Mandrill.php:165
+#: src/Transactional/Mandrill.php:226
 #, php-format
 msgid ""
 "This email address has beeing rejected for an unknown reason [%s]. Please "
@@ -31,16 +30,8 @@ msgstr ""
 "Questo indirizzo email é stato rifiutato per un motivo sconosciuto [%s]. Per "
 "favore utilizza un altro indirizzo email."
 
-#: ../../../../vendor/silverbackstudio/wp-email/src/Marketing/Exceptions/ContactNotExists.php:13
-msgid "Contact does not exists"
-msgstr "Il contatto non esiste"
-
-#: ../../../../vendor/silverbackstudio/wp-email/src/Marketing/Exceptions/ApiKeyInvalid.php:13
-msgid "Please specify an API key"
-msgstr "Per favore specifica una chiave API"
-
-#: ../../../../vendor/silverbackstudio/wp-email/src/Transactional/Exceptions/EmailRejectRule.php:13
-#: ../../../../vendor/silverbackstudio/wp-email/src/Transactional/Exceptions/EmailReject.php:13
+#: src/Transactional/Exceptions/EmailReject.php:13
+#: src/Transactional/Exceptions/EmailRejectRule.php:13
 msgid ""
 "This address has beed rejected, this sometimes is due to multiple tries to "
 "send to a full or disabled inbox. Please try again later"
@@ -48,22 +39,17 @@ msgstr ""
 "Questo indirizzo è stato rifiutato. Questo spesso avviene a causa di troppi "
 "invii consecutivi a una casella disabilitata. Per favore riprova più tardi."
 
-#: ../../../../vendor/silverbackstudio/wp-email/src/Transactional/Exceptions/EmailRejectInvalidAddress.php:13
+#: src/Transactional/Exceptions/EmailRejectTestLimit.php:13
+msgid "The test mode sending limit is beeing reached."
+msgstr "E' stato raggiunto il limite di invio per l'account di test."
+
+#: src/Transactional/Exceptions/EmailRejectInvalidAddress.php:13
 msgid "Your email address is invalid. Please check the address or use another."
 msgstr ""
 "Il tuo indirizzo email non è valido. Per favore controlla eventuali errori "
 "oppure utilizza un altro indirizzo."
 
-#: ../../../../vendor/silverbackstudio/wp-email/src/Transactional/Exceptions/EmailRejectHardBounce.php:13
-msgid ""
-"The mailbox is non existent or disabled. Please check your email address is "
-"correct or your contact your mailbox provider."
-msgstr ""
-"L'indirizzo di posta specificato è inesistente o non attivo. Per favore "
-"controlla che l'indirizzo sia corretto oppure contatta il tuo provider di "
-"posta."
-
-#: ../../../../vendor/silverbackstudio/wp-email/src/Transactional/Exceptions/EmailRejectSpam.php:13
+#: src/Transactional/Exceptions/EmailRejectSpam.php:13
 msgid ""
 "Your mailbox is reporting our message as spam. Please add our domain to "
 "trusted senders or contact the website tech support"
@@ -72,25 +58,43 @@ msgstr ""
 "favore aggiungi il nostro dominio nella lista dei mittenti verificati o "
 "contatta il supporto tecnico."
 
-#: ../../../../vendor/silverbackstudio/wp-email/src/Transactional/Exceptions/EmailRejectInvalidSender.php:13
-msgid "Invalid sender address."
-msgstr "Indirizzo del mittente non valido."
-
-#: ../../../../vendor/silverbackstudio/wp-email/src/Transactional/Exceptions/EmailRejectTestLimit.php:13
-msgid "The test mode sending limit is beeing reached."
-msgstr "E' stato raggiunto il limite di invio per l'account di test."
-
-#: ../../../../vendor/silverbackstudio/wp-email/src/Transactional/Exceptions/EmailRejectTestAccount.php:13
-msgid "This email address is a test account."
-msgstr "Questo indirizzo email è un account di prova."
-
-#: ../../../../vendor/silverbackstudio/wp-email/src/Transactional/Exceptions/EmailRejectSoftBounce.php:13
+#: src/Transactional/Exceptions/EmailRejectSoftBounce.php:13
 msgid ""
 "Your mailbox isn't accepting our message. Please check your if mailbox your "
 "mailbox is full."
 msgstr ""
 "La tua casella di post non accetta il nostro messaggio. Per favore controlla "
 "se la tua casella è attiva ed ha spazio disponibile."
+
+#: src/Transactional/Exceptions/ApiKeyInvalid.php:13
+#: src/Marketing/Exceptions/ApiKeyInvalid.php:13
+msgid "Please specify an API key"
+msgstr "Per favore specifica una chiave API"
+
+#: src/Transactional/Exceptions/EmailRejectTestAccount.php:13
+msgid "This email address is a test account."
+msgstr "Questo indirizzo email è un account di prova."
+
+#: src/Transactional/Exceptions/EmailRejectHardBounce.php:13
+msgid ""
+"The mailbox is non existent or disabled. Please check your email address is "
+"correct or your contact your mailbox provider."
+msgstr ""
+"L'indirizzo di posta specificato è inesistente o non attivo. Per favore "
+"controlla che l'indirizzo sia corretto oppure contatta il tuo provider di "
+"posta."
+
+#: src/Transactional/Exceptions/EmailRejectInvalidSender.php:13
+msgid "Invalid sender address."
+msgstr "Indirizzo del mittente non valido."
+
+#: src/Marketing/Exceptions/ContactAlreadyExists.php:13
+msgid "Contact already exists"
+msgstr "Il contatto esiste già"
+
+#: src/Marketing/Exceptions/ContactNotExists.php:13
+msgid "Contact does not exists"
+msgstr "Il contatto non esiste"
 
 #. Name of the plugin
 msgid "Silverback Email Services"
