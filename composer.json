@@ -1,15 +1,12 @@
 {
-    "name": "silverback/wp-email",
-    "type": "wordpress-muplugin",
+    "name": "silverbackstudio/wp-email",
+    "type": "library",
     "authors": [
         {
             "name": "Brando Meniconi",
             "email": "b.meniconi@silverbackstudio.it"
         }
     ],
-    "replace": {
-        "silverbackstudio/wp-email": "1.3.*"
-    },
     "autoload": {
         "psr-4": {"Svbk\\WP\\Email\\": "src/"}
     },   
