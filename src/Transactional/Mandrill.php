@@ -49,7 +49,7 @@ class Mandrill implements ServiceInterface {
 		try {
 			
 			do_action( 'log', 'debug', 'Mandrill sendTemplate() invoked', 
-				array(  'template' => $template, 'params' => $params ) ) 
+				array(  'template' => $template, 'params' => $params )
 			);			
 			
 			$results = $this->client->messages->sendTemplate( $template, array(), $params );
