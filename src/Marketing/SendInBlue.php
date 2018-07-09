@@ -56,15 +56,15 @@ class SendInBlue extends ServiceInterface {
 
 		$contact_attributes = apply_filters( 'svbk_email_contact_create_sendinblue_attributes', $contact_attributes, $contact, $contact->lists, $this );
 
-		do_action( 'log', 'debug', 'SendinBlue createContact() invoked', 
-			array( 'attributes' => $contact_attributes )
-		);
-
 		$createContact = new SendInBlue_Client\Model\CreateContact( $contact_attributes );
 
 		if ( ! empty( $contact->lists ) ) {
 			$createContact->setListIds( $contact->lists );
 		}
+
+		do_action( 'log', 'debug', 'SendinBlue createContact() invoked', 
+			array( 'request' => $contact_attributes )
+		);
 
 		try {				
 
@@ -179,6 +179,8 @@ class SendInBlue extends ServiceInterface {
 
 		$data = $this->parseContact( $contact );
 		
+		$updateContact->setSmtpBlacklistSender([]);
+		
 		if( !empty( $data ) ) {
 			$updateContact->setAttributes( $data['attributes'] );
 		}
@@ -188,7 +190,9 @@ class SendInBlue extends ServiceInterface {
 		}
 		
 		do_action( 'log', 'debug', 'SendinBlue saveContact() invoked', 
-			array( 'contact' => $contact )
+			array( 
+				'contact' => $updateContact 
+			)
 		);		
 		
 		try {
