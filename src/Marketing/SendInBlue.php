@@ -153,7 +153,7 @@ class SendInBlue extends ServiceInterface {
 			$contact->listSubscribe( $list_id );
 		}		
 		
-		$this->saveContact( $contact );
+		$result = $this->saveContact( $contact );
 		
 		return $result;
 	}
