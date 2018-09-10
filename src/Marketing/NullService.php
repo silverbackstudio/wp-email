@@ -8,6 +8,18 @@ use Exception;
 
 class NullService extends ServiceInterface {
 
+	public function __construct(){
+		add_action( 'admin_notices', array( $this, 'admin_notice' ) );
+	}
+
+	public function admin_notice() {
+	    ?>
+	    <div class="notice notice-warning">
+	        <p><?php _e( 'Warning: A Form hasn\'t been configured to subscribe users, please check form configuration', 'svbk-email-services' ); ?></p>
+	    </div>
+	    <?php
+	}
+
 	public function createContact( Contact $contact ) {
 		return 1;
 	}
