@@ -4,9 +4,12 @@ namespace Svbk\WP\Email\Marketing;
 
 use Svbk\WP\Email\Contact;
 use Exception;
+use DateTime;
 
 
 class NullService extends ServiceInterface {
+
+	const DATE_FORMAT = DateTime::ISO8601;
 
 	public function __construct(){
 		add_action( 'admin_notices', array( $this, 'admin_notice' ) );
@@ -39,5 +42,9 @@ class NullService extends ServiceInterface {
 	public function saveContact( Contact $contact, $custom_attributes = array()) {
 		return 1;
 	}
+	
+	public static function formatDate( DateTime $date ) {
+		return $date->format( self::DATE_FORMAT );
+	}	
 
 }

@@ -3,6 +3,7 @@ namespace Svbk\WP\Email\Marketing;
 
 use Svbk\WP\Email\Contact;
 use Exception;
+use DateTime;
 use SendinBlue\Client as SendInBlue_Client;
 
 class SendInBlue extends ServiceInterface {
@@ -326,6 +327,10 @@ class SendInBlue extends ServiceInterface {
 		}
 		
 		return $lists;
+	}
+	
+	public static function formatDate( DateTime $date ) {
+		return $date->format( self::DATE_FORMAT );
 	}
 	
 }

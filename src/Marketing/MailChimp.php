@@ -2,6 +2,7 @@
 
 namespace Svbk\WP\Email\Marketing;
 
+use DateTime;
 use Svbk\WP\Email\Contact;
 use Svbk\WP\Email\Utils;
 use \DrewM\MailChimp\MailChimp as MailChimp_Client;
@@ -10,6 +11,8 @@ class MailChimp extends ServiceInterface {
 
 	public $id = 'mailchimp';
 	public $client;
+
+	const DATE_FORMAT = DateTime::ISO8601;
 
 	public function __construct( $api_key ) {
 		
@@ -242,6 +245,10 @@ class MailChimp extends ServiceInterface {
 		}
 
 		return $result;
+	}
+
+	public static function formatDate( DateTime $date ) {
+		return $date->format( self::DATE_FORMAT );
 	}
 
 }
