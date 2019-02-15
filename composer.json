@@ -1,6 +1,6 @@
 {
-    "name": "silverbackstudio/wp-email",
-    "type": "library",
+    "name": "silverback/svbk-email",
+    "type": "wordpress-muplugin",
     "authors": [
         {
             "name": "Brando Meniconi",
@@ -22,10 +22,14 @@
         "dealerdirect/phpcodesniffer-composer-installer": "^0.4.2",
         "wimg/php-compatibility": "^8.0"        
     },
+    "replace": [
+        "silverbackstudio/wp-email"
+    ],
     "scripts": {
         "test": [
-          "vendor/bin/phpcs src"
-        ],
+          "vendor/bin/phpcs src",
+          "vendor/bin/phpunit --bootstrap vendor/autoload.php --color tests"
+        ],        
         "beautify": [
           "vendor/bin/phpcbf src"
         ]        

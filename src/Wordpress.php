@@ -4,6 +4,10 @@ namespace Svbk\WP\Email;
 
 class Wordpress {
 
+	public static $last_email_id = '';
+	public static $last_email_contert = '';
+	public static $last_email_data;
+
 	public function message( $to, $subject, $message, $headers = '', $attachments = array() ) {
 
 		/**
@@ -190,7 +194,26 @@ class Wordpress {
 
 	}
 
+	public static function trackedMessages(){
+		return array(
+			'user_request_action' => __( 'User Request Action', 'svbk-email' ),
+		);
+	}
 
-
+	public static function trackMessages(){
+		add_filter( 'user_request_action_email_content', array( self::class, 'track_user_request_action' ) );
+	}
+	
+	public static function track_user_request_action( $email_text, $email_data ){
+		self::$last_email_id = 'user_request_action';
+		self::$last_email_data = $email_data;
+		self::$last_email_content = $email_text;
+	}	
+	
+	public static function clearTracker(){
+		self::$last_email_id = '';
+		self::$last_email_data = null;
+		self::$last_email_content = null;
+	}		
 
 }
