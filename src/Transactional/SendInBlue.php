@@ -1,174 +1,319 @@
 <?php
 namespace Svbk\WP\Email\Transactional;
 
+use Svbk\WP\Email\Utils;
 use SendinBlue\Client as SendInBlue_Client;
 use Exception;
+use GuzzleHttp;
 
 class SendInBlue implements ServiceInterface {
 
 	public $api_key;
-	
+
 	public $config;
 	public $client;
 	public $smtp_client;
-	
+
 	const TEMPLATE_SUPPORT = true;
 
-	public function __construct( $api_key = null ) {
-		
-		if( $api_key ) {
-			$this->config = new SendInBlue_Client\Configuration;
+	public function __construct( $api_key = null, $httpClient = null ) {
+
+		if ( $api_key ) {
+			$this->config = new SendInBlue_Client\Configuration();
 			$this->config->setApiKey( 'api-key', $api_key );
 		} else {
 			$this->config = SendInBlue_Client\Configuration::getDefaultConfiguration();
 		}
-		
-		if( ! $this->config->getApiKey('api-key') ) {
-			
-			do_action( 'log', 'critical', 'Missing Sendinblue API key');
-			
+
+		if ( ! $this->config->getApiKey( 'api-key' ) ) {
+
+			do_action( 'log', 'critical', 'Missing Sendinblue API key' );
+
 			throw new Exceptions\ApiKeyInvalid();
 		}
-		
-		$this->client = new SendInBlue_Client\ApiClient( $this->config );
-		$this->smtp_client = new SendInBlue_Client\Api\SMTPApi( $this->client );
+
+		if ( ! $httpClient ) {
+			$httpClient = new GuzzleHttp\Client();
+		}
+
+		$this->smtp_client = new SendInBlue_Client\Api\SMTPApi(
+			$httpClient,
+			$this->config
+		);
 	}
 
-	public static function setApiKey( $api_key ) {
-		SendInBlue_Client\Configuration::getDefaultConfiguration()->setApiKey( 'api-key', $api_key );
+	public function setApiKey( $api_key ) {
+		$this->config->setApiKey( 'api-key', $api_key );
 	}
 
-	public function sendTemplate( $email, $template, $attributes = array() ) {
+	public function sendTemplate( $template, $message, $attributes = array() ) {
 
-		do_action( 'log', 'debug', 'SendinBlue sendTemplate() invoked', 
-			array( 'template' => $template, 'attributes' => $attributes ) 
+		do_action(
+			'log', 'debug', 'SendinBlue sendTemplate() invoked',
+			array(
+				'template' => $template,
+				'attributes' => $attributes,
+			)
 		);
 
-		$sendEmail = new SendInBlue_Client\Model\SendEmail();
-		
-		if( $email->to ) { 
-			$sendEmail->setEmailTo( array( $email->to->email ) );
-		}
-	
-		if( $email->cc ) {
-			$sendEmail->setEmailCc( array( $email->cc->email ) );
-		}		
-		
-		if( $email->bcc ) {
-			$sendEmail->setEmailBcc( array( $email->bcc->email ) );
-		}
+		$message->attributes = array_merge( $message->attributes, $attributes );
 
-		if ( $email->reply_to ) {
-			$sendEmail->setReplyTo( $email->reply_to->email );
-		}
-		
-		$attributes = array_merge( $email->attributes, $attributes );
-		$uc_attributes = array();
-		$input_attributes = array();		
-		
-		if( ! empty( $attributes ) ) {
-			
-			foreach( $attributes as $key => $value ){
-				$uc_attributes[ strtoupper( $key ) ] = $value;
-				$input_attributes[ strtoupper( 'INPUT_' . $key ) ] = $value;
-			}
-			
-			$sendEmail->setAttributes( array_merge( $attributes, $uc_attributes, $input_attributes ) );		
-		}		
-		
+		$sendEmail = $this->prepareSendTemplate( $message );
+
 		try {
 			$result = $this->smtp_client->sendTemplate( $template, $sendEmail );
 		} catch ( SendInBlue_Client\ApiException $e ) {
-			
-			do_action( 'log', 'error', 'Sendinblue sendTemplate() API request error', 
-				array( 'error' => $e->getResponseBody() ) 
+
+			do_action(
+				'log', 'error', 'Sendinblue sendTemplate() API request error',
+				array(
+					'error' => $e->getResponseBody(),
+				)
 			);
-			
-			throw new Exceptions\ServiceError( $e->getResponseBody()->message );			
+
+			throw new Exceptions\ServiceError( $e->getResponseBody() );
 		} catch ( Exception $e ) {
-			
-			do_action( 'log', 'error', 'Sendinblue sendTemplate() generic request error',
-				array( 'error' => $e->getMessage() ) 
+
+			do_action(
+				'log', 'error', 'Sendinblue sendTemplate() generic request error',
+				array(
+					'error' => $e->getMessage(),
+				)
 			);
-			
+
 			throw new Exceptions\ServiceError( $e->getMessage() );
 		}
-		
-		do_action( 'log', 'info', 'Sendinblue sendTemplate() successful', 
-			array( 'result' => $result ) 
-		);			
 
-	}
-
-	public function send( $email ) {
-
-		do_action( 'log', 'debug', 'SendinBlue send() invoked', 
-			array( 'email' => $email ) 
+		do_action(
+			'log', 'info', 'Sendinblue sendTemplate() successful',
+			array(
+				'result' => $result,
+			)
 		);
 
-		$sendEmail = new SendInBlue_Client\Model\SendSmtpEmail();
+		$message_id = $result->getMessageId();
 		
-		if( $email->to ) { 
-			$emailTo = new SendinBlue_Client\Model\SendSmtpEmailTo();
-			$emailTo->setEmail( $email->to->email );
-			$emailTo->setName( $email->to->name() ?: null );
-			$sendEmail->setTo( array( $emailTo ) );
+		return $message_id ?: true;
+	}
+
+
+	public function send( $message, $template = null, $attributes = array() ) {
+
+		do_action(
+			'log', 'debug', 'SendinBlue send() invoked',
+			array(
+				'email' => $message,
+				'template' => $template,
+				'attributes' => $attributes,
+			)
+		);
+
+		if ( !empty( $attributes ) ) {
+			$message->attributes = array_merge( $message->attributes, $attributes );
+		}
+
+		$sendSmtpEmail = $this->prepareSend( $message, $template );
+
+		try {
+			$result = $this->smtp_client->sendTransacEmail( $sendSmtpEmail );
+		} catch ( SendInBlue_Client\ApiException $e ) {
+
+			do_action(
+				'log', 'error', 'Sendinblue send() API request error',
+				array(
+					'error' => $e->getResponseBody(),
+				)
+			);
+
+			throw new Exceptions\ServiceError( $e->getResponseBody() );
+
+		} catch ( Exception $e ) {
+
+			do_action(
+				'log', 'error', 'Sendinblue send() generic request error',
+				array(
+					'error' => $e->getMessage(),
+				)
+			);
+
+			throw new Exceptions\ServiceError( $e->getMessage() );
+
+		}
+
+		do_action(
+			'log', 'info', 'Sendinblue send() successful',
+			array(
+				'result' => $result,
+			)
+		);
+		
+		$message_id = $result->getMessageId();
+		
+		return $message_id ?: true;
+		
+	}
+
+	public function prepareSendTemplate( $message ) {
+		
+		$sendEmail = new SendInBlue_Client\Model\SendEmail();
+
+		if ( !empty( $message->to ) ){
+			$sendEmail->setEmailTo( Utils::extract( $message->to, 'email' ) );
 		}
 		
-		if( $email->cc ) {
-			$emailCc = new SendinBlue_Client\Model\SendSmtpEmailCc();
-			$emailCc->setEmail( $email->cc->email );
-			$emailCc->setName( $email->cc->name() ?: null  );
-			$sendEmail->setCc( array( $emailCc ) );
+		if ( !empty( $message->cc ) ){
+			$sendEmail->setEmailCc( Utils::extract( $message->cc, 'email' ) );
+		}
+		
+		if ( !empty( $message->bcc ) ){
+			$sendEmail->setEmailBcc( Utils::extract( $message->bcc, 'email' ) );
+		}
+
+		if ( $message->reply_to ) {
+			$sendEmail->setReplyTo( $message->reply_to->email );
+		}
+		
+		if ( ! empty( $message->attributes ) ) {
+			$sendEmail->setAttributes( $message->attributes );
+		}	
+		
+		$headers = $message->getHeaders( true );
+		if ( ! empty( $headers ) ) {
+			$sendEmail->setHeaders( $headers );
 		}		
 		
-		if( $email->bcc ) {
-			$emailBcc = new SendinBlue_Client\Model\SendSmtpEmailBcc();
-			$emailBcc->setEmail( $email->bcc->email );
-			$emailBcc->setName( $email->bcc->name() ?: null );
-			$sendEmail->setBcc( array( $emailBcc ) );
+		if ( ! empty( $message->tags ) ) {
+			$sendEmail->setTags( $message->tags );
 		}
 
-		if ( $email->reply_to ) {
-			$emailReplyTo = new SendinBlue_Client\Model\SendSmtpEmailReplyTo();
-			$emailReplyTo->setEmail( $email->reply_to->email );
-			$emailReplyTo->setName( $email->reply_to->name() ?: null  );
-			$sendEmail->setReplyTo( $emailReplyTo );
-		}
+		if ( ! empty( $message->attributes ) ) {
+			$sendEmail->setAttributes( $message->attributes );
+		}		
 		
-		$sender = new SendInBlue_Client\Model\SendSmtpEmailSender();
-		$sender->setEmail( $email->from->email );
-		$sender->setName( $email->from->name() ?: null );
-		
-		$sendEmail->setSender( $sender );
-		$sendEmail->setSubject( $email->subject );
-		$sendEmail->setHtmlContent( $email->html_body );
-		$sendEmail->setTextContent( $email->text_body );
-		
-		try {
-			$result = $this->smtp_client->sendTransacEmail( $sendEmail );
-		} catch ( SendInBlue_Client\ApiException $e ) {
-			
-			do_action( 'log', 'error', 'Sendinblue send() API request error', 
-				array( 'error' => $e->getResponseBody() ) 
-			);
-			
-			throw new Exceptions\ServiceError( $e->getResponseBody()->message );
-			
-		} catch ( Exception $e ) {
-			
-			do_action( 'log', 'error', 'Sendinblue send() generic request error', 
-				array( 'error' => $e->getMessage() ) 
-			);
-			
-			throw new Exceptions\ServiceError( $e->getMessage() );
-			
-		}
-		
-		do_action( 'log', 'info', 'Sendinblue send() successful', 
-			array( 'result' => $result ) 
-		);				
-
+		return $sendEmail;
 	}
+
+	public function prepareSend( $message, $template = null ) {
+
+		do_action(
+			'log', 'debug', 'SendinBlue send() invoked',
+			array(
+				'email' => $message,
+			)
+		);
+		$sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail();
+
+		if ( ! empty( $message->from ) ) {
+			$sender = new SendInBlue_Client\Model\SendSmtpEmailSender();
+			$sender->setEmail( $message->from->email );
+			$sender->setName( $message->from->name() ?: null );
+			$sendSmtpEmail->setSender( $sender );
+		} else {
+			throw new Exceptions\MessageMissingFrom;
+		}
+
+		if ( ! empty( $message->to ) ) {
+			$sendSmtpEmail->setTo( self::castContacts( $message->to,  SendinBlue_Client\Model\SendSmtpEmailTo::class ) );
+		} else {
+			throw new Exceptions\MessageMissingTo;
+		}
+
+		if ( ! empty( $message->cc ) ) {
+			$sendSmtpEmail->setCc( self::castContacts( $message->cc,  SendinBlue_Client\Model\SendSmtpEmailCc::class ) );
+		} 
+
+		if ( ! empty( $message->bcc ) ) {
+			$sendSmtpEmail->setBcc( self::castContacts( $message->bcc, SendinBlue_Client\Model\SendSmtpEmailBcc::class ) );
+		}
+
+		if ( ! empty( $message->reply_to ) ) {
+			$emailReplyTo = new SendinBlue_Client\Model\SendSmtpEmailReplyTo();
+			$emailReplyTo->setEmail( $message->reply_to->email );
+			$emailReplyTo->setName( $message->reply_to->name() ?: null );
+			$sendSmtpEmail->setReplyTo( $emailReplyTo );
+		}
+
+		if ( $message->subject ) {
+			$sendSmtpEmail->setSubject( $message->subject );
+		} else {
+			throw new Exceptions\MessageMissingSubject;	
+		}
+		
+		if ( !$message->html_body && !$message->text_body ) {
+			throw new Exceptions\MessageMissingBody;	
+		}
+		
+		if ( $message->html_body ) {
+			$sendSmtpEmail->setHtmlContent( $message->html_body );
+		}
+		
+		if ( $message->text_body ) {
+			$sendSmtpEmail->setTextContent( $message->text_body );
+		}
+
+		$headers = $message->getHeaders( true );
+		if ( ! empty( $headers ) ) {
+			$sendSmtpEmail->setHeaders( $headers );
+		}
+
+		if ( ! empty( $message->tags ) ) {
+			$sendSmtpEmail->setTags( $message->tags );
+		}
+
+		if ( ! empty( $message->attributes ) ) {
+			$sendSmtpEmail->setParams( $message->attributes );
+		}
+
+		if ( ! empty( $template ) ) {
+			$sendSmtpEmail->setTemplateId( $template );
+		}
+
+		// $attachments = $message->getAttachments();
+		// if ( !empty($attachments) ) {
+		// $sendSmtpEmail->setHedaers( $attachments );
+		// }
+		return $sendSmtpEmail;
+	}
+
+	public static function castContacts( $contacts, $class ) {
+		$cast_contacts = array();
+
+		foreach ( $contacts as $contact ) {
+			$cast_contact = new $class();
+			
+			if ( $contact->email ) {
+				$cast_contact->setEmail( $contact->email );
+			}
+			
+			$name = $contact->name();
+			
+			if ( $name ) {
+				$cast_contact->setName( $name );
+			}
+			
+			$cast_contacts[] = $cast_contact;
+		}
+
+		return $cast_contacts;
+	}
+
+	
+	public function getTemplates($limit = 50, $offset = 0){
+		
+		$templateQuery = $this->smtp_client->getSmtpTemplates(null, $limit, $offset);
+		
+		$templates = array();
+		
+		if ( $templateQuery->getCount() > 0 ){
+			$templateObjects = $templateQuery->getTemplates();
+			
+			foreach( $templateObjects as $template ) {
+				$templates[$template->getId()] = $template->getName();	
+			}
+			
+		}
+		
+		return $templates;
+	}	
 
 }

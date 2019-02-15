@@ -15,12 +15,12 @@ class MailChimp extends ServiceInterface {
 	const DATE_FORMAT = DateTime::ISO8601;
 
 	public function __construct( $api_key ) {
-		
-		if( empty( $api_key ) ){
+
+		if ( empty( $api_key ) ) {
 			do_action( 'log', 'critical', 'Missing Mailchimp API key' );
 			throw new Exceptions\ApiKeyInvalid();
 		}
-		
+
 		$this->client = new MailChimp_Client( $api_key );
 	}
 
@@ -28,17 +28,20 @@ class MailChimp extends ServiceInterface {
 
 		$subscriber_hash = $this->client->subscriberHash( $contact->email );
 
-		do_action( 'log', 'debug', 'Mailchimp createContact() invoked', 
-			array( 'contact' => $contact )  
+		do_action(
+			'log', 'debug', 'Mailchimp createContact() invoked',
+			array(
+				'contact' => $contact,
+			)
 		);
 
 		$user_attributes = $contact->attributes;
-		
-		if( $contact->first_name() ) {
+
+		if ( $contact->first_name() ) {
 			$user_attributes['FNAME'] = $contact->first_name();
 		}
-		
-		if( $contact->last_name() ) {
+
+		if ( $contact->last_name() ) {
 			$user_attributes['LNAME'] = $contact->last_name();
 		}
 
@@ -55,25 +58,32 @@ class MailChimp extends ServiceInterface {
 
 			$mc_attributes = apply_filters( 'svbk_email_contact_create_mailchimp_attributes', $mc_attributes, $contact, $list_id, $this );
 
-			$raw_result = $this->client->post( "lists/$list_id/members", $mc_attributes	);
+			$raw_result = $this->client->post( "lists/$list_id/members", $mc_attributes );
 
 			if ( $this->client->success() ) {
-				do_action('svbk_email_contact_created', $raw_result, $user_attributes, $this );
-				do_action('svbk_email_contact_created_mailchimp', $raw_result, $user_attributes, $this );
-				
-				do_action( 'log', 'debug', 'Mailchimp user successfully inserted', 
-					array( 'result' => $raw_result, 'list_id' => $list_id )
-				);				
-			} else {
-				do_action( 'log', 'notice', 'Mailchimp createContact() request not successful on list {list_id}', 
-					array( 'error' => $this->client->getLastError(), 'list_id' => $list_id  )  
+				do_action( 'svbk_email_contact_created', $raw_result, $user_attributes, $this );
+				do_action( 'svbk_email_contact_created_mailchimp', $raw_result, $user_attributes, $this );
+
+				do_action(
+					'log', 'debug', 'Mailchimp user successfully inserted',
+					array(
+						'result' => $raw_result,
+						'list_id' => $list_id,
+					)
 				);
-				throw new Exceptions\ContactAlreadyExists( $this->client->getLastError() );	
+			} else {
+				do_action(
+					'log', 'notice', 'Mailchimp createContact() request not successful on list {list_id}',
+					array(
+						'error' => $this->client->getLastError(),
+						'list_id' => $list_id,
+					)
+				);
+				throw new Exceptions\ContactAlreadyExists( $this->client->getLastError() );
 			}
-			
-		} 
-		
-		if( isset($raw_result['id']) ) {
+		}
+
+		if ( isset( $raw_result['id'] ) ) {
 			return $raw_result['id'];
 		}
 	}
@@ -81,63 +91,80 @@ class MailChimp extends ServiceInterface {
 	public function saveContact( Contact $contact, $custom_attributes = array() ) {
 
 		$subscriber_hash = $this->client->subscriberHash( $contact->email );
-	
-		do_action( 'log', 'debug', 'Mailchimp saveContact() invoked', 
-			array( 'contact' => $contact )
+
+		do_action(
+			'log', 'debug', 'Mailchimp saveContact() invoked',
+			array(
+				'contact' => $contact,
+			)
 		);
 
 		$attributes = $custom_attributes;
-		$attributes['merge_fields'] = Utils::upperKeys( array_filter( $contact->attributes ) ) ;
+		$attributes['merge_fields'] = Utils::upperKeys( array_filter( $contact->attributes ) );
 
-		if( $contact->first_name() ) {
+		if ( $contact->first_name() ) {
 			$attributes['merge_fields']['FNAME'] = $contact->first_name();
 		}
-		
-		if( $contact->last_name() ) {
+
+		if ( $contact->last_name() ) {
 			$attributes['merge_fields']['LNAME'] = $contact->last_name();
 		}
-		
-		if(	$contact->phone ) {
+
+		if ( $contact->phone ) {
 			$attributes['PHONE'] = $contact->phone;
 		}
 
 		foreach ( $contact->lists as $list_id ) {
 
 			$user_info = $this->client->get( "lists/$list_id/members/$subscriber_hash" );
-	
+
 			if ( $this->client->success() ) {
-	
+
 				$raw_result = $this->client->patch( "lists/$list_id/members/$subscriber_hash", $attributes );
-	
-				do_action( 'log', 'info', 'Mailchimp user successfully inserted', 
-					array( 'result' => $raw_result, 'list_id' => $list_id ) 
+
+				do_action(
+					'log', 'info', 'Mailchimp user successfully inserted',
+					array(
+						'result' => $raw_result,
+						'list_id' => $list_id,
+					)
 				);
-				
+
 				if ( $this->client->success() ) {
-					do_action('svbk_email_contact_updated', $raw_result, $attributes, $this );
-					do_action('svbk_email_contact_updated_mailchimp', $raw_result, $attributes, $this );								
-					
-					do_action( 'log', 'info', 'Mailchimp user successfully patched', 
-						array( 'result' => $raw_result, 'list_id' => $list_id )
+					do_action( 'svbk_email_contact_updated', $raw_result, $attributes, $this );
+					do_action( 'svbk_email_contact_updated_mailchimp', $raw_result, $attributes, $this );
+
+					do_action(
+						'log', 'info', 'Mailchimp user successfully patched',
+						array(
+							'result' => $raw_result,
+							'list_id' => $list_id,
+						)
 					);
-					
+
 				} else {
-					do_action( 'log', 'error', 'Mailchimp user PATCH request not successful on list {list_id}', 
-						array( 'error' => $this->client->getLastError(), 'list_id' => $list_id  )  
+					do_action(
+						'log', 'error', 'Mailchimp user PATCH request not successful on list {list_id}',
+						array(
+							'error' => $this->client->getLastError(),
+							'list_id' => $list_id,
+						)
 					);
 
 					throw new Exceptions\ServiceError( $this->client->getLastError() );
 				}
-				
 			} else {
-				
-				do_action( 'log', 'notice', 'Mailchimp user GET request  to update not successful on list {list_id}', 
-					array( 'error' => $this->client->getLastError(), 'list_id' => $list_id  )  
+
+				do_action(
+					'log', 'notice', 'Mailchimp user GET request  to update not successful on list {list_id}',
+					array(
+						'error' => $this->client->getLastError(),
+						'list_id' => $list_id,
+					)
 				);
-				
+
 				throw new Exceptions\ContactNotExists();
 			}
-			
 		}
 
 		return $raw_result;
@@ -150,8 +177,12 @@ class MailChimp extends ServiceInterface {
 
 		$subscriber_hash = $this->client->subscriberHash( $email );
 
-		do_action( 'log', 'debug', 'Mailchimp listSubscribe() invoked', 
-			array( 'contact' => $contact, 'lists' => $lists ) 
+		do_action(
+			'log', 'debug', 'Mailchimp listSubscribe() invoked',
+			array(
+				'contact' => $contact,
+				'lists' => $lists,
+			)
 		);
 
 		foreach ( (array) $lists as $list_id ) {
@@ -168,26 +199,37 @@ class MailChimp extends ServiceInterface {
 
 				if ( $this->success() ) {
 					$contact->listSubscribe( $list_id );
-					
-					do_action( 'log', 'debug', 'Mailchimp user successfully subscribed to list', 
-						array( 'result' => $results[ $list_id ], 'list_id' => $list_id )
-					);					
-					
+
+					do_action(
+						'log', 'debug', 'Mailchimp user successfully subscribed to list',
+						array(
+							'result' => $results[ $list_id ],
+							'list_id' => $list_id,
+						)
+					);
+
 				} else {
-					
-					do_action( 'log', 'error', 'Mailchimp user PATCH request not successful on list {list_id}', 
-						array( 'error' => $this->client->getLastError(), 'list_id' => $list_id  )  
-					);					
-					
+
+					do_action(
+						'log', 'error', 'Mailchimp user PATCH request not successful on list {list_id}',
+						array(
+							'error' => $this->client->getLastError(),
+							'list_id' => $list_id,
+						)
+					);
+
 					throw new Exceptions\ServiceError( $this->client->getLastError() );
 				}
-				
 			} else {
-				
-				do_action( 'log', 'notice', 'Mailchimp user GET request to subscribe not successful on list {list_id}', 
-					array( 'error' => $this->client->getLastError(), 'list_id' => $list_id  )  
-				);				
-				
+
+				do_action(
+					'log', 'notice', 'Mailchimp user GET request to subscribe not successful on list {list_id}',
+					array(
+						'error' => $this->client->getLastError(),
+						'list_id' => $list_id,
+					)
+				);
+
 				throw new Exceptions\ContactNotExists();
 			}
 		}
@@ -200,8 +242,12 @@ class MailChimp extends ServiceInterface {
 		$results = array();
 		$args = array();
 
-		do_action( 'log', 'debug', 'Mailchimp listUnsubscribe() invoked', 
-			array( 'contact' => $contact, 'lists' => $lists )
+		do_action(
+			'log', 'debug', 'Mailchimp listUnsubscribe() invoked',
+			array(
+				'contact' => $contact,
+				'lists' => $lists,
+			)
 		);
 
 		$subscriber_hash = $this->client->subscriberHash( $email );
@@ -220,26 +266,37 @@ class MailChimp extends ServiceInterface {
 
 				if ( $this->success() ) {
 					$contact->listUnsubscribe( $list_id );
-					
-					do_action( 'log', 'debug', 'Mailchimp user successfully unsubscribed from list', 
-						array( 'result' => $results[ $list_id ], 'list_id' => $list_id )
-					);						
-					
+
+					do_action(
+						'log', 'debug', 'Mailchimp user successfully unsubscribed from list',
+						array(
+							'result' => $results[ $list_id ],
+							'list_id' => $list_id,
+						)
+					);
+
 				} else {
-					
-					do_action( 'log', 'error', 'Mailchimp user PATCH request not successful on list {list_id}', 
-						array( 'error' => $this->client->getLastError(), 'list_id' => $list_id  )  
-					);						
-					
+
+					do_action(
+						'log', 'error', 'Mailchimp user PATCH request not successful on list {list_id}',
+						array(
+							'error' => $this->client->getLastError(),
+							'list_id' => $list_id,
+						)
+					);
+
 					throw new Exceptions\ServiceError( $this->client->getLastError() );
 				}
-				
 			} else {
 
-				do_action( 'log', 'notice', 'Mailchimp user GET request to unsubscribe not successful on list {list_id}', 
-					array( 'error' => $this->client->getLastError(), 'list_id' => $list_id  )  
-				);				
-				
+				do_action(
+					'log', 'notice', 'Mailchimp user GET request to unsubscribe not successful on list {list_id}',
+					array(
+						'error' => $this->client->getLastError(),
+						'list_id' => $list_id,
+					)
+				);
+
 				throw new Exceptions\ContactNotExists();
 			}
 		}

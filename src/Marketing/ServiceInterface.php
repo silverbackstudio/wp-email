@@ -21,7 +21,7 @@ abstract class ServiceInterface {
 	abstract public function listUnsubscribe( Contact $contact, $lists = array() );
 
 	abstract public function saveContact( Contact $contact, $custom_attributes = array());
-	
+
 	abstract public static function formatDate( DateTime $date );
 
 }
