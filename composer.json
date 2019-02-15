@@ -22,9 +22,9 @@
         "dealerdirect/phpcodesniffer-composer-installer": "^0.4.2",
         "wimg/php-compatibility": "^8.0"        
     },
-    "replace": [
-        "silverbackstudio/wp-email"
-    ],
+    "replace": {
+        "silverbackstudio/wp-email": "*"
+    },
     "scripts": {
         "test": [
           "vendor/bin/phpcs src",
