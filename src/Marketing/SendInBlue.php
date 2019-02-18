@@ -275,8 +275,8 @@ class SendInBlue extends ServiceInterface {
 
 		$data = array();
 
-		if ( ! empty( $contact->attributes ) ) {
-			$data['attributes'] = $contact->attributes;
+		if ( ! empty( $contact->getAttributes() ) ) {
+			$data['attributes'] = $contact->getAttributes();
 		}
 
 		if ( $contact->first_name() ) {

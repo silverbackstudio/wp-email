@@ -16,9 +16,15 @@ class SendInBlue implements ServiceInterface {
 
 	const TEMPLATE_SUPPORT = true;
 
-	public function __construct( $api_key = null, $httpClient = null ) {
+	public function __construct( $api_key = null, $config = null, $httpClient = null ) {
 
-		if ( $api_key ) {
+		if ( $config instanceof SendInBlue_Client\Configuration ) {
+			$this->config = $config;
+		} else  {
+			$this->config = SendInBlue_Client\Configuration::getDefaultConfiguration();
+		}
+
+		if ( is_string($api_key) ) {
 			$this->config = new SendInBlue_Client\Configuration();
 			$this->config->setApiKey( 'api-key', $api_key );
 		} else {
@@ -56,7 +62,7 @@ class SendInBlue implements ServiceInterface {
 			)
 		);
 
-		$message->attributes = array_merge( $message->attributes, $attributes );
+		$message->setAttributes( $attributes );
 
 		$sendEmail = $this->prepareSendTemplate( $message );
 
@@ -109,7 +115,7 @@ class SendInBlue implements ServiceInterface {
 		);
 
 		if ( !empty( $attributes ) ) {
-			$message->attributes = array_merge( $message->attributes, $attributes );
+			$message->setAttributes( $attributes );
 		}
 
 		$sendSmtpEmail = $this->prepareSend( $message, $template );
@@ -173,8 +179,8 @@ class SendInBlue implements ServiceInterface {
 			$sendEmail->setReplyTo( $message->reply_to->email );
 		}
 		
-		if ( ! empty( $message->attributes ) ) {
-			$sendEmail->setAttributes( $message->attributes );
+		if ( ! empty( $message->getAttributes() ) ) {
+			$sendEmail->setAttributes( $message->getAttributes() );
 		}	
 		
 		$headers = $message->getHeaders( true );
@@ -185,10 +191,6 @@ class SendInBlue implements ServiceInterface {
 		if ( ! empty( $message->tags ) ) {
 			$sendEmail->setTags( $message->tags );
 		}
-
-		if ( ! empty( $message->attributes ) ) {
-			$sendEmail->setAttributes( $message->attributes );
-		}		
 		
 		return $sendEmail;
 	}
@@ -260,8 +262,8 @@ class SendInBlue implements ServiceInterface {
 			$sendSmtpEmail->setTags( $message->tags );
 		}
 
-		if ( ! empty( $message->attributes ) ) {
-			$sendSmtpEmail->setParams( $message->attributes );
+		if ( ! empty( $message->getAttributes() ) ) {
+			$sendSmtpEmail->setParams( $message->getAttributes() );
 		}
 
 		if ( ! empty( $template ) ) {

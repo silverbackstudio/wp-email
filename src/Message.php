@@ -117,11 +117,12 @@ class Message {
 	 * Set multiple message attributes
 	 *
 	 * @param array $attributes The attribute key=>values to set
+ 	 * @param boolean $merge    Merges attributes to existing ones, otherwhise replaces the whole array. 
 	 *
 	 * @return void
 	 */
-	public function setAttributes( $attributes, $reset = false ) {
-		$this->attributes = array_replace($reset ? array() : $this->attributes, $attributes );
+	public function setAttributes( $attributes, $merge = true ) {
+		$this->attributes = $merge ? array_replace($this->attributes, $attributes ) : $attributes;
 	}	
 
 	/**

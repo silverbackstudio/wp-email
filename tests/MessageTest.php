@@ -216,7 +216,7 @@ final class MessageTest extends TestCase {
 		);
 
 		$attributes2 = array(
-			'attr4' => 'val4',
+			'attr3' => 'val4',
 			'attr5' => 'val5',
 			'attr6' => 'val6',	
 		);
@@ -240,15 +240,15 @@ final class MessageTest extends TestCase {
 			array(
 				'attr1' => 'val1',
 				'attr2' => 'val2',
-				'attr3' => 'val3',
-				'attr4' => 'val4',
+				'attr3' => 'val4',
+				//'attr4' => 'val4',
 				'attr5' => 'val5',
 				'attr6' => 'val6',				
 			),
 			$message->getAttributes()
 		);			
 
-		$message->setAttributes( $attributes1, true );
+		$message->setAttributes( $attributes1, false );
 		$this->assertEquals(
 			$attributes1,
 			$message->getAttributes()
@@ -259,6 +259,17 @@ final class MessageTest extends TestCase {
 			array(
 				'attr1' => 'val1',
 				'attr2' => 'val2',
+				'attr3' => 'val3',
+				'attr4' => 'val4',
+			),
+			$message->getAttributes()
+		);
+		
+		$message->setAttribute( 'attr2', 'val7' );
+		$this->assertEquals(
+			array(
+				'attr1' => 'val1',
+				'attr2' => 'val7',
 				'attr3' => 'val3',
 				'attr4' => 'val4',
 			),

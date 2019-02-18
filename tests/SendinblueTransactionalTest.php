@@ -8,10 +8,6 @@ use Svbk\WP\Email\Transactional\SendInBlue;
 use Svbk\WP\Email\Transactional\Exceptions;
 use SendinBlue\Client as SendInBlue_Client;
 
-function do_action(){}
-function __( $text ) {
-	return $text; }
-
 final class SendinblueTransactionalTest extends TestCase {
 
 	protected $sendinblue;
@@ -61,10 +57,11 @@ final class SendinblueTransactionalTest extends TestCase {
 	}
 
 	public function testCanCatchInvalidApiKey() {
-
-		$this->expectException( Exceptions\ApiKeyInvalid::class );
-
-		$sendinblue = new SendInBlue();
+		$sendinblue = new SendInBlue('foo-api-key', new SendInBlue_Client\Configuration );
+		
+		$this->expectException( Exceptions\ApiKeyInvalid::class );		
+		
+		$sendinblue = new SendInBlue('', new SendInBlue_Client\Configuration );
 	}
 	
 	public function testCanCatchMissingFrom() {
@@ -357,13 +354,14 @@ final class SendinblueTransactionalTest extends TestCase {
 			'attr3' => 'value3',
 			'attr4' => 'value4',
 		];
-		$message->attributes = $attributes;
-
+		$message->setAttributes( $attributes );
+		
 		$sentSmtpEmail = $sendinblue->prepareSend( $message );
 		$this->assertEquals( $attributes, $sentSmtpEmail->getParams() );
 		
 		$sendEmail = $sendinblue->prepareSendTemplate( $message );
 		$this->assertEquals( $attributes, $sendEmail->getAttributes() );		
+		
 	}
 
 	public function testCanPrepareMessageTemplateId() {

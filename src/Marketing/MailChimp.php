@@ -35,7 +35,7 @@ class MailChimp extends ServiceInterface {
 			)
 		);
 
-		$user_attributes = $contact->attributes;
+		$user_attributes = $contact->getAttributes();
 
 		if ( $contact->first_name() ) {
 			$user_attributes['FNAME'] = $contact->first_name();
@@ -100,7 +100,7 @@ class MailChimp extends ServiceInterface {
 		);
 
 		$attributes = $custom_attributes;
-		$attributes['merge_fields'] = Utils::upperKeys( array_filter( $contact->attributes ) );
+		$attributes['merge_fields'] = Utils::upperKeys( array_filter( $contact->getAttributes() ) );
 
 		if ( $contact->first_name() ) {
 			$attributes['merge_fields']['FNAME'] = $contact->first_name();

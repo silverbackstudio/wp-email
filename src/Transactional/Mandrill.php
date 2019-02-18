@@ -31,7 +31,7 @@ class Mandrill implements ServiceInterface {
 	public function sendTemplate( $message, $template, $attributes = array() ) {
 		$params = $this->messageParams( $message );
 
-		$attributes = array_merge( $message->attributes, $attributes );
+		$attributes = array_merge( $message->getAttributes(), $attributes );
 		$uc_attributes = array();
 		$input_attributes = array();
 

@@ -6,20 +6,6 @@ use Svbk\WP\Email\Message;
 use Svbk\WP\Email\Contact;
 use Svbk\WP\Email\Wordpress;
 
-function apply_filters( $name, $input ) {
-	return $input;
-}
-
-function get_bloginfo( $info ) {
-	switch ( $info ) {
-		case 'charset':
-			return 'utf-8';
-			break;
-	}
-
-	return '';
-}
-
 final class WordpressTest extends TestCase {
 
 

@@ -203,6 +203,85 @@ final class ContactTest extends TestCase {
 		);			
 
 	}	
+	
+	public function testAttributes() {
+
+		$contact = new Contact();
+
+		$attributes1 = array(
+			'attr1' => 'val1',
+			'attr2' => 'val2',
+			'attr3' => 'val3',
+		);
+
+		$attributes2 = array(
+			'attr3' => 'val4',
+			'attr5' => 'val5',
+			'attr6' => 'val6',	
+		);
+
+		$this->assertIsArray(
+			$contact->getAttributes()
+		);
+
+		$this->assertEmpty(
+			$contact->getAttributes()
+		);
+	
+		$contact->setAttributes( $attributes1 );
+		$this->assertEquals(
+			$attributes1,
+			$contact->getAttributes()
+		);	
+		
+		$contact->setAttributes( $attributes2 );
+		$this->assertEquals(
+			array(
+				'attr1' => 'val1',
+				'attr2' => 'val2',
+				'attr3' => 'val4',
+				//'attr4' => 'val4',
+				'attr5' => 'val5',
+				'attr6' => 'val6',				
+			),
+			$contact->getAttributes()
+		);			
+
+		$contact->setAttributes( $attributes1, false );
+		$this->assertEquals(
+			$attributes1,
+			$contact->getAttributes()
+		);
+		
+		$contact->setAttribute( 'attr4', 'val4' );
+		
+		// Test for deprecated function
+		$contact->addAttribute( 'attr8', 'val8' );
+		
+		$this->assertEquals(
+			array(
+				'attr1' => 'val1',
+				'attr2' => 'val2',
+				'attr3' => 'val3',
+				'attr4' => 'val4',
+				'attr8' => 'val8',
+			),
+			$contact->getAttributes()
+		);
+		
+		$contact->setAttribute( 'attr2', 'val7' );
+		$this->assertEquals(
+			array(
+				'attr1' => 'val1',
+				'attr2' => 'val7',
+				'attr3' => 'val3',
+				'attr4' => 'val4',
+				'attr8' => 'val8',				
+			),
+			$contact->getAttributes()
+		);		
+
+	}		
 
 
 }
