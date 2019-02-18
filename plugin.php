@@ -27,12 +27,6 @@ function svbk_email_init() {
 }
 add_action( 'muplugins_loaded', 'svbk_email_init' );
 
-// function svbk_email_test() {
-//     wp_new_user_notification(1, null, 'admin');
-// }
-// add_action( 'init', 'svbk_email_test' );
-
-
 $options = get_option( 'svbk_email_options' );
 
 if ( !empty($options['provider']) && !function_exists( 'wp_mail' ) ) {
