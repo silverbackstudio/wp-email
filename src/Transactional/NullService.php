@@ -18,7 +18,7 @@ class NullService implements ServiceInterface {
 	public function admin_notice() {
 		?>
 		<div class="notice notice-warning">
-			<p><?php _e( 'Warning: A Form hasn\'t been configured to send emails, please check form configuration', 'svbk-email-services' ); ?></p>
+			<p><?php _e( 'Warning: A Form hasn\'t been configured to send emails, please check form configuration', svbk-email ); ?></p>
 		</div>
 		<?php
 	}

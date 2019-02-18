@@ -10,7 +10,7 @@ class ApiKeyInvalid extends Exception {
 	public function __construct( $message = null, $code = 0, Exception $previous = null ) {
 
 		if ( ! $message ) {
-			$message = __( 'Please specify an API key', 'svbk-email-services' );
+			$message = __( 'Please specify an API key', svbk-email );
 		}
 
 		parent::__construct( $message, $code, $previous );

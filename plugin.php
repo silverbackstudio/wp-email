@@ -12,7 +12,7 @@ Description: Send Wordpress emails through Email Services API with templates
 Author: Silverback Studio
 Version: 2.0
 Author URI: http://www.silverbackstudio.it/
-Text Domain: svbk-email-services
+Text Domain: svbk-email
 */
 
 use Svbk\WP\Email;

@@ -1,0 +1,105 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Silverback Helpers\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-02-18 14:29+0000\n"
+"PO-Revision-Date: 2019-02-18 14:34+0000\n"
+"Last-Translator: silverbackstudio <webmaster@silverbackstudio.it>\n"
+"Language-Team: Italiano\n"
+"Language: it_IT\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Loco-Version: 2.2.0; wp-5.0.3"
+
+#: plugin.php:243
+msgid "-- Core --"
+msgstr "-- Sito --"
+
+#: plugin.php:267
+msgid "-- No Template --"
+msgstr "-- Nessun Template --"
+
+#: plugin.php:228
+msgid "Choose which template should be used"
+msgstr "Seleziona quale template deve essere utilizzato per ciascuna email"
+
+#: plugin.php:223
+msgid "Choose wich provider you want to use to send emails"
+msgstr "Scegli quale fornitore vuoi utilizzare per inviare le email"
+
+#. title
+#: plugin.php:178
+msgid "Default Template"
+msgstr "Modello predefinito"
+
+#. title
+#: plugin.php:142
+msgid "Email Provider"
+msgstr "Fornitore Email"
+
+#. title
+#: plugin.php:130
+msgid "General Settings"
+msgstr "Impostazioni generali"
+
+#. Author URI of the plugin
+msgid "http://www.silverbackstudio.it/"
+msgstr "http://www.silverbackstudio.it/"
+
+#. URI of the plugin
+msgid "https://github.com/silverbackstudio/wp-email"
+msgstr "https://github.com/silverbackstudio/wp-email"
+
+#: plugin.php:249
+msgid "Mandrill"
+msgstr "Mandrill"
+
+#: src/Wordpress.php:201
+msgid "New User Welcome"
+msgstr "Benvenuto per Nuovo Utente"
+
+#. Description of the plugin
+msgid "Send Wordpress emails through Email Services API with templates"
+msgstr ""
+"Invia le email di Wordpress attraverso le API di piattaforme di invio email. "
+"Supporta i template"
+
+#: plugin.php:246
+msgid "Sendinblue"
+msgstr "Sendinblue"
+
+#: plugin.php:289
+msgid "Settings Saved"
+msgstr "Impostazioni Salvate"
+
+#. Name of the plugin
+msgid "Silverback Email Services"
+msgstr "Silverback Email Services"
+
+#. Author of the plugin
+msgid "Silverback Studio"
+msgstr "Silverback Studio"
+
+#. title
+#: plugin.php:166
+msgid "Templates"
+msgstr "Modelli"
+
+#: src/Transactional/Exceptions/MessageMissingFrom.php:13
+msgid "Your email has no \"from\" address. Please specify one."
+msgstr "La tue email non ha un mittente. Specificane uno."
+
+#: src/Transactional/Exceptions/MessageMissingBody.php:13
+msgid ""
+"Your email has no body. Please specify one at least one of html_body or "
+"html_content"
+msgstr ""
+"La tue email non ha un corpo. Per favore specifica almeno una tra la "
+"versione HTML o la versione testo."
+
+#: src/Transactional/Exceptions/MessageMissingSubject.php:13
+msgid "Your email has no subject. Please specify one."
+msgstr "La tue email non ha un oggetto. Specificane uno."

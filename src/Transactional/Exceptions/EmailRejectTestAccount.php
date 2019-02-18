@@ -10,7 +10,7 @@ class EmailRejectTestAccount extends EmailReject {
 	public function __construct( $message = null, $code = 0, Exception $previous = null ) {
 
 		if ( ! $message ) {
-			$message = __( 'This email address is a test account.', 'svbk-email-services' );
+			$message = __( 'This email address is a test account.', svbk-email );
 		}
 
 		parent::__construct( $message, $code, $previous );
