@@ -1,6 +1,8 @@
 {
-    "name": "silverback/svbk-email",
+    "name": "silverback/svbk-wp-email",
+    "description": "Send Wordpress emails with templates through Email Services API (Sendinblue, Mandrill..)",
     "type": "wordpress-muplugin",
+    "license": "GPL-3.0-only",
     "authors": [
         {
             "name": "Brando Meniconi",
@@ -10,6 +12,12 @@
     "autoload": {
         "psr-4": {"Svbk\\WP\\Email\\": "src/"}
     },   
+    "conflict": {
+        "wpackagist-plugin/mailin":"*"
+    },
+    "replace": {
+        "silverbackstudio/wp-email":"^2.0.0"
+    },    
     "require": {
         "drewm/mailchimp-api": "^2.4",
         "mandrill/mandrill": "^1.0",
