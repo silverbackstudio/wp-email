@@ -74,7 +74,7 @@ final class SendinblueTransactionalTest extends TestCase {
 		$message = $this->setupMessage($message);
 		$message->from = array();
 		
-		$sentSmtpEmail = $sendinblue->prepareSend( $message );
+		$sentSmtpEmail = $sendinblue->send( $message );
 		
 	}	
 	
@@ -88,7 +88,21 @@ final class SendinblueTransactionalTest extends TestCase {
 		$message = $this->setupMessage($message);
 		$message->to = array();
 	
-		$sentSmtpEmail = $sendinblue->prepareSend( $message );
+		$sentSmtpEmail = $sendinblue->send( $message );
+		
+	}	
+	
+	public function testCanCatchTemplateMissingTo() {
+
+		$this->expectException( Exceptions\MessageMissingTo::class );
+		
+		$sendinblue = new SendInBlue( 'api-key' );
+		
+		$message = new Message();
+		$message = $this->setupMessage($message);
+		$message->to = array();
+	
+		$sentSmtpEmail = $sendinblue->sendTemplate( 1, $message );
 		
 	}	
 
@@ -102,7 +116,7 @@ final class SendinblueTransactionalTest extends TestCase {
 		$message = $this->setupMessage($message);
 		$message->subject = '';
 	
-		$sentSmtpEmail = $sendinblue->prepareSend( $message );
+		$sentSmtpEmail = $sendinblue->send( $message );
 		
 	}	
 	
@@ -126,7 +140,7 @@ final class SendinblueTransactionalTest extends TestCase {
 
 		$this->expectException( Exceptions\MessageMissingBody::class );
 		
-		$sentSmtpEmail = $sendinblue->prepareSend( $message );
+		$sendinblue->send( $message );
 		
 	}		
 
@@ -136,7 +150,7 @@ final class SendinblueTransactionalTest extends TestCase {
 		$message = new Message();
 
 		$this->setupMessage($message);
-
+		
 		$sentSmtpEmail = $sendinblue->prepareSend( $message );
 
 		$this->assertNull( $sentSmtpEmail->getCc() );
@@ -149,6 +163,30 @@ final class SendinblueTransactionalTest extends TestCase {
 		$this->assertNull( $sentSmtpEmail->getTemplateId() );
 
 	}
+	
+	public function testCanPrepareEmptyTemplateMessage() {
+
+		$sendinblue = new SendInBlue( 'api-key' );
+		$message = new Message();
+
+		$this->setupMessage($message);
+		
+		$message->html_body = '';
+		$message->text_body = '';
+		$message->subject = '';		
+
+		$sentSmtpEmail = $sendinblue->prepareSendTemplate( $message );
+
+		$this->assertNull( $sentSmtpEmail->getEmailCc() );
+		$this->assertNull( $sentSmtpEmail->getEmailBcc() );
+		$this->assertNull( $sentSmtpEmail->getReplyTo() );
+		$this->assertNull( $sentSmtpEmail->getHeaders() );
+		$this->assertNull( $sentSmtpEmail->getAttachment() );
+		$this->assertNull( $sentSmtpEmail->getHeaders() );
+		$this->assertNull( $sentSmtpEmail->getAttributes() );
+		$this->assertNull( $sentSmtpEmail->getTags() );
+
+	}	
 
 	public function testCanPrepareMessageFrom() {
 

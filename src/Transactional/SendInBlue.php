@@ -165,6 +165,8 @@ class SendInBlue implements ServiceInterface {
 
 		if ( !empty( $message->to ) ){
 			$sendEmail->setEmailTo( Utils::extract( $message->to, 'email' ) );
+		} else {
+			throw new Exceptions\MessageMissingTo;
 		}
 		
 		if ( !empty( $message->cc ) ){

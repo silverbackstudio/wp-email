@@ -11,7 +11,6 @@ class SendInBlue extends ServiceInterface {
 	public $id = 'sendinblue';
 
 	public $config;
-	public $client;
 
 	public $client_contacts;
 
@@ -19,9 +18,15 @@ class SendInBlue extends ServiceInterface {
 
 	const DATE_FORMAT = 'Y-m-d';
 
-	public function __construct( $api_key = null ) {
+	public function __construct( $api_key = null, $config = null, $httpClient = null ) {
 
-		if ( $api_key ) {
+		if ( $config instanceof SendInBlue_Client\Configuration ) {
+			$this->config = $config;
+		} else  {
+			$this->config = SendInBlue_Client\Configuration::getDefaultConfiguration();
+		}
+
+		if ( is_string($api_key) ) {
 			$this->config = new SendInBlue_Client\Configuration();
 			$this->config->setApiKey( 'api-key', $api_key );
 		} else {
@@ -29,12 +34,20 @@ class SendInBlue extends ServiceInterface {
 		}
 
 		if ( ! $this->config->getApiKey( 'api-key' ) ) {
+
 			do_action( 'log', 'critical', 'Missing Sendinblue API key' );
+
 			throw new Exceptions\ApiKeyInvalid();
 		}
 
-		$this->client = new SendInBlue_Client\ApiClient( $this->config );
-		$this->client_contacts = new SendInBlue_Client\Api\ContactsApi( $this->client );
+		if ( ! $httpClient ) {
+			$httpClient = new GuzzleHttp\Client();
+		}
+
+		$this->client_contacts = new SendInBlue_Client\Api\ContactsApi(
+			$httpClient,
+			$this->config
+		);
 	}
 
 	public static function remove_plugin_script() {
