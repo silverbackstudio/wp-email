@@ -235,7 +235,7 @@ class Wordpress {
 	}
 
 	public static function store_password_key( $key, $user ){
-		self::$password_key = $key;
+		self::$last_email_data['password_reset_link'] = network_site_url("wp-login.php?action=rp&key=$key&login=" . rawurlencode($user->user_login), 'login');
 		
 		return $key;
 	}
@@ -243,13 +243,9 @@ class Wordpress {
 	public static function track_wp_new_user_notification_email( $params, $user ){
 		self::$last_email_id = 'new_user_notification_email';
 		
-		$key = self::$password_key;
-		self::$password_key = null;
-		
 		$new_params = $params;
-		$new_params['password_reset_link'] = network_site_url("wp-login.php?action=rp&key=$key&login=" . rawurlencode($user->user_login), 'login');
 		
-		self::$last_email_data = array_merge( self::getCommonData($user), $new_params );
+		self::$last_email_data = array_merge( self::$last_email_data, self::getCommonData($user), $new_params );
 		self::$last_email_content = $params['message'];
 		
 		return $params;
