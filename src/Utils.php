@@ -34,9 +34,8 @@ class Utils {
 		$result = array();
 
 		// if ( version_compare(PHP_VERSION, '7.0.0') >= 0 ) {
-		// 	return array_column($objects, $property, $key);
+		// return array_column($objects, $property, $key);
 		// }
-		
 		foreach ( $objects as $object ) {
 			if ( $key && property_exists( $object, $key ) && ! empty( $object->{$key} ) ) {
 				$result[ $object->{$key} ] = $object->{$property};

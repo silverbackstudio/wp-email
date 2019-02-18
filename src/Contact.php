@@ -158,9 +158,9 @@ class Contact {
 	}
 
 	public function addAttribute( $key, $value ) {
-		$this->setAttribute($key, $value);
+		$this->setAttribute( $key, $value );
 	}
-	
+
 	/**
 	 * Set a message attribute
 	 *
@@ -170,20 +170,20 @@ class Contact {
 	 * @return void
 	 */
 	public function setAttribute( $name, $value ) {
-		$this->attributes[$name] = $value;
+		$this->attributes[ $name ] = $value;
 	}
 
 	/**
 	 * Set multiple message attributes
 	 *
-	 * @param array $attributes The attribute key=>values to set
+	 * @param array   $attributes The attribute key=>values to set
 	 * @param boolean $merge    Merges attributes to existing ones, otherwhise replaces the whole array.
 	 *
 	 * @return void
 	 */
 	public function setAttributes( $attributes, $merge = true ) {
-		$this->attributes = $merge ? array_replace($this->attributes, $attributes ) : $attributes;
-	}	
+		$this->attributes = $merge ? array_replace( $this->attributes, $attributes ) : $attributes;
+	}
 
 	/**
 	 * Get all message attributes
@@ -192,7 +192,7 @@ class Contact {
 	 */
 	public function getAttributes() {
 		return $this->attributes;
-	}	
+	}
 
 	public function listSubscribe( $list_id, $marketing = null ) {
 

@@ -12,19 +12,19 @@ final class SendinblueTransactionalTest extends TestCase {
 
 	protected $sendinblue;
 	protected $message;
-	
+
 	const TEST_API_KEY = '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';
 
 	protected function setUp() : void {
-	
+
 	}
 
-	protected function setupMessage( $message ){
-		
+	protected function setupMessage( $message ) {
+
 		$message->subject = 'My Subject';
-		$message->html_body = 'My HTML Body';		
-		$message->text_body = 'My TEXT Body';		
-		
+		$message->html_body = 'My HTML Body';
+		$message->text_body = 'My TEXT Body';
+
 		$message->setFrom(
 			new Contact(
 				[
@@ -33,7 +33,7 @@ final class SendinblueTransactionalTest extends TestCase {
 				]
 			)
 		);
-		
+
 		$message->addRecipient(
 			new Contact(
 				[
@@ -42,7 +42,7 @@ final class SendinblueTransactionalTest extends TestCase {
 				]
 			)
 		);
-		
+
 		$message->addRecipient(
 			new Contact(
 				[
@@ -50,107 +50,107 @@ final class SendinblueTransactionalTest extends TestCase {
 					'email' => 'to2@example.com',
 				]
 			)
-		);	
-		
+		);
+
 		return $message;
-		
+
 	}
 
 	public function testCanCatchInvalidApiKey() {
-		$sendinblue = new SendInBlue('foo-api-key', new SendInBlue_Client\Configuration );
-		
-		$this->expectException( Exceptions\ApiKeyInvalid::class );		
-		
-		$sendinblue = new SendInBlue('', new SendInBlue_Client\Configuration );
+		$sendinblue = new SendInBlue( 'foo-api-key', new SendInBlue_Client\Configuration() );
+
+		$this->expectException( Exceptions\ApiKeyInvalid::class );
+
+		$sendinblue = new SendInBlue( '', new SendInBlue_Client\Configuration() );
 	}
-	
+
 	public function testCanCatchMissingFrom() {
 
 		$this->expectException( Exceptions\MessageMissingFrom::class );
-		
+
 		$sendinblue = new SendInBlue( 'api-key' );
-		
+
 		$message = new Message();
-		$message = $this->setupMessage($message);
+		$message = $this->setupMessage( $message );
 		$message->from = array();
-		
+
 		$sentSmtpEmail = $sendinblue->send( $message );
-		
-	}	
-	
+
+	}
+
 	public function testCanCatchMissingTo() {
 
 		$this->expectException( Exceptions\MessageMissingTo::class );
-		
+
 		$sendinblue = new SendInBlue( 'api-key' );
-		
+
 		$message = new Message();
-		$message = $this->setupMessage($message);
+		$message = $this->setupMessage( $message );
 		$message->to = array();
-	
+
 		$sentSmtpEmail = $sendinblue->send( $message );
-		
-	}	
-	
+
+	}
+
 	public function testCanCatchTemplateMissingTo() {
 
 		$this->expectException( Exceptions\MessageMissingTo::class );
-		
+
 		$sendinblue = new SendInBlue( 'api-key' );
-		
+
 		$message = new Message();
-		$message = $this->setupMessage($message);
+		$message = $this->setupMessage( $message );
 		$message->to = array();
-	
+
 		$sentSmtpEmail = $sendinblue->sendTemplate( 1, $message );
-		
-	}	
+
+	}
 
 	public function testCanCatchMissingSubject() {
 
 		$this->expectException( Exceptions\MessageMissingSubject::class );
-		
+
 		$sendinblue = new SendInBlue( 'api-key' );
-		
+
 		$message = new Message();
-		$message = $this->setupMessage($message);
+		$message = $this->setupMessage( $message );
 		$message->subject = '';
-	
+
 		$sentSmtpEmail = $sendinblue->send( $message );
-		
-	}	
-	
+
+	}
+
 	public function testCanCatchMissingBody() {
 
 		$sendinblue = new SendInBlue( 'api-key' );
-		
+
 		$message = new Message();
-		$message = $this->setupMessage($message);
-		
+		$message = $this->setupMessage( $message );
+
 		$message->html_body = '';
-	
+
 		$sentSmtpEmail = $sendinblue->prepareSend( $message );
 
 		$message->html_body = 'My HTML Body';
 		$message->text_body = '';
-		
+
 		$sentSmtpEmail = $sendinblue->prepareSend( $message );
 
 		$message->html_body = '';
 
 		$this->expectException( Exceptions\MessageMissingBody::class );
-		
+
 		$sendinblue->send( $message );
-		
-	}		
+
+	}
 
 	public function testCanPrepareEmptyMessage() {
 
 		$sendinblue = new SendInBlue( 'api-key' );
 		$message = new Message();
 
-		$this->setupMessage($message);
-		
+		$this->setupMessage( $message );
+
 		$sentSmtpEmail = $sendinblue->prepareSend( $message );
 
 		$this->assertNull( $sentSmtpEmail->getCc() );
@@ -163,17 +163,17 @@ final class SendinblueTransactionalTest extends TestCase {
 		$this->assertNull( $sentSmtpEmail->getTemplateId() );
 
 	}
-	
+
 	public function testCanPrepareEmptyTemplateMessage() {
 
 		$sendinblue = new SendInBlue( 'api-key' );
 		$message = new Message();
 
-		$this->setupMessage($message);
-		
+		$this->setupMessage( $message );
+
 		$message->html_body = '';
 		$message->text_body = '';
-		$message->subject = '';		
+		$message->subject = '';
 
 		$sentSmtpEmail = $sendinblue->prepareSendTemplate( $message );
 
@@ -186,7 +186,7 @@ final class SendinblueTransactionalTest extends TestCase {
 		$this->assertNull( $sentSmtpEmail->getAttributes() );
 		$this->assertNull( $sentSmtpEmail->getTags() );
 
-	}	
+	}
 
 	public function testCanPrepareMessageFrom() {
 
@@ -234,7 +234,7 @@ final class SendinblueTransactionalTest extends TestCase {
 		$this->assertInstanceOf( SendinBlue_Client\Model\SendSmtpEmailReplyTo::class, $reply_to );
 		$this->assertEquals( 'reply-to@example.com', $reply_to->getEmail() );
 		$this->assertEquals( 'My ReplyTo', $reply_to->getName() );
-		
+
 		$sendEmail = $sendinblue->prepareSendTemplate( $message );
 
 		$reply_to = $sendEmail->getReplyTo();
@@ -284,7 +284,7 @@ final class SendinblueTransactionalTest extends TestCase {
 		$this->assertContainsOnly( SendinBlue_Client\Model\SendSmtpEmailBcc::class, $bcc );
 		$this->assertEquals( 'bcc@example.com', $bcc[0]->getEmail() );
 		$this->assertEquals( 'My BCC', $bcc[0]->getName() );
-		
+
 		$sendEmail = $sendinblue->prepareSendTemplate( $message );
 
 		$to = $sendEmail->getEmailTo();
@@ -293,7 +293,7 @@ final class SendinblueTransactionalTest extends TestCase {
 
 		$cc = $sendEmail->getEmailCc();
 		$this->assertCount( 1, $cc );
-		$this->assertEquals( 'cc@example.com', $cc[0]);
+		$this->assertEquals( 'cc@example.com', $cc[0] );
 
 		$bcc = $sendEmail->getEmailBcc();
 		$this->assertCount( 1, $bcc );
@@ -319,9 +319,9 @@ final class SendinblueTransactionalTest extends TestCase {
 
 		$sendinblue = new SendInBlue( 'api-key' );
 		$message = new Message();
-		
+
 		$this->setupMessage( $message );
-		
+
 		$message->html_body = 'My HTML Body';
 		$message->text_body = 'My TEXT Body';
 
@@ -329,16 +329,16 @@ final class SendinblueTransactionalTest extends TestCase {
 
 		$this->assertEquals( 'My HTML Body', $sentSmtpEmail->getHtmlContent() );
 		$this->assertEquals( 'My TEXT Body', $sentSmtpEmail->getTextContent() );
-		
+
 	}
 
 	public function testCanPrepareMessageHeaders() {
 
 		$sendinblue = new SendInBlue( 'api-key' );
 		$message = new Message();
-		
+
 		$this->setupMessage( $message );
-		
+
 		$message->addHeader( 'MyHeaderName1', 'My Header1 Value' );
 		$message->addHeader( 'MyHeaderName2', 'My Header2 Value' );
 
@@ -351,7 +351,7 @@ final class SendinblueTransactionalTest extends TestCase {
 			],
 			$sentSmtpEmail->getHeaders()
 		);
-		
+
 		$sendEmail = $sendinblue->prepareSendTemplate( $message );
 		$this->assertEquals(
 			[
@@ -359,33 +359,33 @@ final class SendinblueTransactionalTest extends TestCase {
 				'MyHeaderName2' => 'My Header2 Value',
 			],
 			$sendEmail->getHeaders()
-		);		
+		);
 	}
 
 	public function testCanPrepareMessageTags() {
 
 		$sendinblue = new SendInBlue( 'api-key' );
 		$message = new Message();
-		
+
 		$this->setupMessage( $message );
-		
+
 		$tags = [ 'tag1', 'tag2', 'tag3' ];
 		$message->tags = $tags;
 
 		$sentSmtpEmail = $sendinblue->prepareSend( $message );
 		$this->assertEquals( $tags, $sentSmtpEmail->getTags() );
-		
+
 		$sendEmail = $sendinblue->prepareSendTemplate( $message );
-		$this->assertEquals( $tags, $sendEmail->getTags() );		
+		$this->assertEquals( $tags, $sendEmail->getTags() );
 	}
 
 	public function testCanPrepareMessageAttributes() {
 
 		$sendinblue = new SendInBlue( 'api-key' );
 		$message = new Message();
-		
+
 		$this->setupMessage( $message );
-		
+
 		$attributes = [
 			'attr1' => 'value1',
 			'attr2' => 'value2',
@@ -393,13 +393,13 @@ final class SendinblueTransactionalTest extends TestCase {
 			'attr4' => 'value4',
 		];
 		$message->setAttributes( $attributes );
-		
+
 		$sentSmtpEmail = $sendinblue->prepareSend( $message );
 		$this->assertEquals( $attributes, $sentSmtpEmail->getParams() );
-		
+
 		$sendEmail = $sendinblue->prepareSendTemplate( $message );
-		$this->assertEquals( $attributes, $sendEmail->getAttributes() );		
-		
+		$this->assertEquals( $attributes, $sendEmail->getAttributes() );
+
 	}
 
 	public function testCanPrepareMessageTemplateId() {
@@ -415,51 +415,38 @@ final class SendinblueTransactionalTest extends TestCase {
 	}
 
 	// public function testCanSendMessage() {
-
-	// 	$sendinblue = new SendInBlue( self::TEST_API_KEY );
-	// 	$message = new Message();
-
-	// 	$this->setupMessage( $message );
-
-	// 	$message->addRecipient(
-	// 		new Contact(
-	// 			[
-	// 				'first_name' => 'My To2',
-	// 				'email' => 'to2@example.com',
-	// 			]
-	// 		)
-	// 	);
-
-	// 	$message_id = $sendinblue->send( $message );
-
-	// 	$this->assertIsString( $message_id );
-
+	// $sendinblue = new SendInBlue( self::TEST_API_KEY );
+	// $message = new Message();
+	// $this->setupMessage( $message );
+	// $message->addRecipient(
+	// new Contact(
+	// [
+	// 'first_name' => 'My To2',
+	// 'email' => 'to2@example.com',
+	// ]
+	// )
+	// );
+	// $message_id = $sendinblue->send( $message );
+	// $this->assertIsString( $message_id );
 	// }
-	
 	// public function testCanSendMessageTemplate() {
-
-	// 	$sendinblue = new SendInBlue( self::TEST_API_KEY );
-	// 	$message = new Message();
-
-	// 	$message->addRecipient(
-	// 		new Contact(
-	// 			[
-	// 				'first_name' => 'My Template To',
-	// 				'email' => 'to-template@example.com',
-	// 			]
-	// 		)
-	// 	);
-		
-	// 	$message->attributes = array(
-	// 		'TEST_ATTRIBUTE' => 'John',
-	// 		'INPUT_FNAME' => 'Doe'
-	// 	);
-
-	// 	$message_id = $sendinblue->sendTemplate( 32, $message );
-
-	// 	$this->assertIsString( $message_id );
+	// $sendinblue = new SendInBlue( self::TEST_API_KEY );
+	// $message = new Message();
+	// $message->addRecipient(
+	// new Contact(
+	// [
+	// 'first_name' => 'My Template To',
+	// 'email' => 'to-template@example.com',
+	// ]
+	// )
+	// );
+	// $message->attributes = array(
+	// 'TEST_ATTRIBUTE' => 'John',
+	// 'INPUT_FNAME' => 'Doe'
+	// );
+	// $message_id = $sendinblue->sendTemplate( 32, $message );
+	// $this->assertIsString( $message_id );
 	// }
-
 	public function testCanGetTemplates() {
 
 		$sendinblue = new SendInBlue( self::TEST_API_KEY );
@@ -468,6 +455,6 @@ final class SendinblueTransactionalTest extends TestCase {
 
 		$this->assertIsArray( $templates );
 
-	}	
+	}
 
 }

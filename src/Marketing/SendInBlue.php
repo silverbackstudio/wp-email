@@ -22,11 +22,11 @@ class SendInBlue extends ServiceInterface {
 
 		if ( $config instanceof SendInBlue_Client\Configuration ) {
 			$this->config = $config;
-		} else  {
+		} else {
 			$this->config = SendInBlue_Client\Configuration::getDefaultConfiguration();
 		}
 
-		if ( is_string($api_key) ) {
+		if ( is_string( $api_key ) ) {
 			$this->config = new SendInBlue_Client\Configuration();
 			$this->config->setApiKey( 'api-key', $api_key );
 		} else {

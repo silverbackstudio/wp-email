@@ -68,14 +68,13 @@ class Message {
 
 		$headers = array();
 
-		foreach( $this->headers as $header ) {
-			
+		foreach ( $this->headers as $header ) {
+
 			if ( array_key_exists( $header['name'], $headers ) ) {
-				$headers[$header['name']] .= ', ' . $header['content'];
+				$headers[ $header['name'] ] .= ', ' . $header['content'];
 			} else {
-				$headers[$header['name']] = $header['content'];
+				$headers[ $header['name'] ] = $header['content'];
 			}
-			
 		}
 
 		return $headers;
@@ -100,7 +99,7 @@ class Message {
 	public function getAttachments() {
 		return $this->attachments;
 	}
-	
+
 	/**
 	 * Set a message attribute
 	 *
@@ -110,20 +109,20 @@ class Message {
 	 * @return void
 	 */
 	public function setAttribute( $name, $value ) {
-		$this->attributes[$name] = $value;
+		$this->attributes[ $name ] = $value;
 	}
 
 	/**
 	 * Set multiple message attributes
 	 *
-	 * @param array $attributes The attribute key=>values to set
- 	 * @param boolean $merge    Merges attributes to existing ones, otherwhise replaces the whole array. 
+	 * @param array   $attributes The attribute key=>values to set
+	 * @param boolean $merge    Merges attributes to existing ones, otherwhise replaces the whole array.
 	 *
 	 * @return void
 	 */
 	public function setAttributes( $attributes, $merge = true ) {
-		$this->attributes = $merge ? array_replace($this->attributes, $attributes ) : $attributes;
-	}	
+		$this->attributes = $merge ? array_replace( $this->attributes, $attributes ) : $attributes;
+	}
 
 	/**
 	 * Get all message attributes
@@ -132,7 +131,7 @@ class Message {
 	 */
 	public function getAttributes() {
 		return $this->attributes;
-	}	
+	}
 
 	/**
 	 * Adds a message recipient

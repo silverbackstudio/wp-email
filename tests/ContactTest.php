@@ -182,28 +182,28 @@ final class ContactTest extends TestCase {
 		);
 
 		$contact = new Contact( $attributes );
-		
+
 		$this->assertEquals(
 			$contact,
 			Contact::normalize( $contact )
 		);
-		
+
 		$this->assertEquals(
 			$contact,
 			Contact::normalize( $contact->emailAddress() )
-		);		
+		);
 
 		$this->assertEquals(
 			$contact,
 			Contact::normalize( $attributes )
-		);	
-		
-		$this->assertNull(
-			Contact::normalize( (object)$attributes )
-		);			
+		);
 
-	}	
-	
+		$this->assertNull(
+			Contact::normalize( (object) $attributes )
+		);
+
+	}
+
 	public function testAttributes() {
 
 		$contact = new Contact();
@@ -217,7 +217,7 @@ final class ContactTest extends TestCase {
 		$attributes2 = array(
 			'attr3' => 'val4',
 			'attr5' => 'val5',
-			'attr6' => 'val6',	
+			'attr6' => 'val6',
 		);
 
 		$this->assertIsArray(
@@ -227,37 +227,37 @@ final class ContactTest extends TestCase {
 		$this->assertEmpty(
 			$contact->getAttributes()
 		);
-	
+
 		$contact->setAttributes( $attributes1 );
 		$this->assertEquals(
 			$attributes1,
 			$contact->getAttributes()
-		);	
-		
+		);
+
 		$contact->setAttributes( $attributes2 );
 		$this->assertEquals(
 			array(
 				'attr1' => 'val1',
 				'attr2' => 'val2',
 				'attr3' => 'val4',
-				//'attr4' => 'val4',
+				// 'attr4' => 'val4',
 				'attr5' => 'val5',
-				'attr6' => 'val6',				
+				'attr6' => 'val6',
 			),
 			$contact->getAttributes()
-		);			
+		);
 
 		$contact->setAttributes( $attributes1, false );
 		$this->assertEquals(
 			$attributes1,
 			$contact->getAttributes()
 		);
-		
+
 		$contact->setAttribute( 'attr4', 'val4' );
-		
+
 		// Test for deprecated function
 		$contact->addAttribute( 'attr8', 'val8' );
-		
+
 		$this->assertEquals(
 			array(
 				'attr1' => 'val1',
@@ -268,7 +268,7 @@ final class ContactTest extends TestCase {
 			),
 			$contact->getAttributes()
 		);
-		
+
 		$contact->setAttribute( 'attr2', 'val7' );
 		$this->assertEquals(
 			array(
@@ -276,12 +276,12 @@ final class ContactTest extends TestCase {
 				'attr2' => 'val7',
 				'attr3' => 'val3',
 				'attr4' => 'val4',
-				'attr8' => 'val8',				
+				'attr8' => 'val8',
 			),
 			$contact->getAttributes()
-		);		
+		);
 
-	}		
+	}
 
 
 }

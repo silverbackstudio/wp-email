@@ -20,11 +20,11 @@ class SendInBlue implements ServiceInterface {
 
 		if ( $config instanceof SendInBlue_Client\Configuration ) {
 			$this->config = $config;
-		} else  {
+		} else {
 			$this->config = SendInBlue_Client\Configuration::getDefaultConfiguration();
 		}
 
-		if ( is_string($api_key) ) {
+		if ( is_string( $api_key ) ) {
 			$this->config = new SendInBlue_Client\Configuration();
 			$this->config->setApiKey( 'api-key', $api_key );
 		} else {
@@ -98,7 +98,7 @@ class SendInBlue implements ServiceInterface {
 		);
 
 		$message_id = $result->getMessageId();
-		
+
 		return $message_id ?: true;
 	}
 
@@ -114,7 +114,7 @@ class SendInBlue implements ServiceInterface {
 			)
 		);
 
-		if ( !empty( $attributes ) ) {
+		if ( ! empty( $attributes ) ) {
 			$message->setAttributes( $attributes );
 		}
 
@@ -152,48 +152,48 @@ class SendInBlue implements ServiceInterface {
 				'result' => $result,
 			)
 		);
-		
+
 		$message_id = $result->getMessageId();
-		
+
 		return $message_id ?: true;
-		
+
 	}
 
 	public function prepareSendTemplate( $message ) {
-		
+
 		$sendEmail = new SendInBlue_Client\Model\SendEmail();
 
-		if ( !empty( $message->to ) ){
+		if ( ! empty( $message->to ) ) {
 			$sendEmail->setEmailTo( Utils::extract( $message->to, 'email' ) );
 		} else {
-			throw new Exceptions\MessageMissingTo;
+			throw new Exceptions\MessageMissingTo();
 		}
-		
-		if ( !empty( $message->cc ) ){
+
+		if ( ! empty( $message->cc ) ) {
 			$sendEmail->setEmailCc( Utils::extract( $message->cc, 'email' ) );
 		}
-		
-		if ( !empty( $message->bcc ) ){
+
+		if ( ! empty( $message->bcc ) ) {
 			$sendEmail->setEmailBcc( Utils::extract( $message->bcc, 'email' ) );
 		}
 
 		if ( $message->reply_to ) {
 			$sendEmail->setReplyTo( $message->reply_to->email );
 		}
-		
+
 		if ( ! empty( $message->getAttributes() ) ) {
 			$sendEmail->setAttributes( $message->getAttributes() );
-		}	
-		
+		}
+
 		$headers = $message->getHeaders( true );
 		if ( ! empty( $headers ) ) {
 			$sendEmail->setHeaders( $headers );
-		}		
-		
+		}
+
 		if ( ! empty( $message->tags ) ) {
 			$sendEmail->setTags( $message->tags );
 		}
-		
+
 		return $sendEmail;
 	}
 
@@ -213,18 +213,18 @@ class SendInBlue implements ServiceInterface {
 			$sender->setName( $message->from->name() ?: null );
 			$sendSmtpEmail->setSender( $sender );
 		} else {
-			throw new Exceptions\MessageMissingFrom;
+			throw new Exceptions\MessageMissingFrom();
 		}
 
 		if ( ! empty( $message->to ) ) {
 			$sendSmtpEmail->setTo( self::castContacts( $message->to,  SendinBlue_Client\Model\SendSmtpEmailTo::class ) );
 		} else {
-			throw new Exceptions\MessageMissingTo;
+			throw new Exceptions\MessageMissingTo();
 		}
 
 		if ( ! empty( $message->cc ) ) {
 			$sendSmtpEmail->setCc( self::castContacts( $message->cc,  SendinBlue_Client\Model\SendSmtpEmailCc::class ) );
-		} 
+		}
 
 		if ( ! empty( $message->bcc ) ) {
 			$sendSmtpEmail->setBcc( self::castContacts( $message->bcc, SendinBlue_Client\Model\SendSmtpEmailBcc::class ) );
@@ -240,17 +240,17 @@ class SendInBlue implements ServiceInterface {
 		if ( $message->subject ) {
 			$sendSmtpEmail->setSubject( $message->subject );
 		} else {
-			throw new Exceptions\MessageMissingSubject;	
+			throw new Exceptions\MessageMissingSubject();
 		}
-		
-		if ( !$message->html_body && !$message->text_body ) {
-			throw new Exceptions\MessageMissingBody;	
+
+		if ( ! $message->html_body && ! $message->text_body ) {
+			throw new Exceptions\MessageMissingBody();
 		}
-		
+
 		if ( $message->html_body ) {
 			$sendSmtpEmail->setHtmlContent( $message->html_body );
 		}
-		
+
 		if ( $message->text_body ) {
 			$sendSmtpEmail->setTextContent( $message->text_body );
 		}
@@ -284,40 +284,39 @@ class SendInBlue implements ServiceInterface {
 
 		foreach ( $contacts as $contact ) {
 			$cast_contact = new $class();
-			
+
 			if ( $contact->email ) {
 				$cast_contact->setEmail( $contact->email );
 			}
-			
+
 			$name = $contact->name();
-			
+
 			if ( $name ) {
 				$cast_contact->setName( $name );
 			}
-			
+
 			$cast_contacts[] = $cast_contact;
 		}
 
 		return $cast_contacts;
 	}
 
-	
-	public function getTemplates($limit = 50, $offset = 0){
-		
-		$templateQuery = $this->smtp_client->getSmtpTemplates(null, $limit, $offset);
-		
+
+	public function getTemplates( $limit = 50, $offset = 0 ) {
+
+		$templateQuery = $this->smtp_client->getSmtpTemplates( null, $limit, $offset );
+
 		$templates = array();
-		
-		if ( $templateQuery->getCount() > 0 ){
+
+		if ( $templateQuery->getCount() > 0 ) {
 			$templateObjects = $templateQuery->getTemplates();
-			
-			foreach( $templateObjects as $template ) {
-				$templates[$template->getId()] = $template->getName();	
+
+			foreach ( $templateObjects as $template ) {
+				$templates[ $template->getId() ] = $template->getName();
 			}
-			
 		}
-		
+
 		return $templates;
-	}	
+	}
 
 }

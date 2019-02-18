@@ -101,8 +101,8 @@ class Mandrill implements ServiceInterface {
 			$params['subject'] = $message->subject;
 		}
 
-		if ( !empty( $message->to ) ) {
-			foreach( $message->to as $recipient  ) {
+		if ( ! empty( $message->to ) ) {
+			foreach ( $message->to as $recipient ) {
 				$params['to'][] = array(
 					'name' => $recipient->name(),
 					'email' => $recipient->email,
@@ -110,15 +110,15 @@ class Mandrill implements ServiceInterface {
 				);
 			}
 		} else {
-			throw new Exceptions\MessageMissingTo;
+			throw new Exceptions\MessageMissingTo();
 		}
 
 		if ( $message->from ) {
 			$params['from_email'] = $message->from->email;
 		}
 
-		if ( !empty( $message->cc ) ) {
-			foreach( $message->cc as $recipient  ) {
+		if ( ! empty( $message->cc ) ) {
+			foreach ( $message->cc as $recipient ) {
 				$params['to'][] = array(
 					'name' => $recipient->name(),
 					'email' => $recipient->email,
@@ -127,8 +127,8 @@ class Mandrill implements ServiceInterface {
 			}
 		}
 
-		if ( !empty( $message->bcc ) ) {
-			foreach( $message->bcc as $recipient  ) {
+		if ( ! empty( $message->bcc ) ) {
+			foreach ( $message->bcc as $recipient ) {
 				$params['to'][] = array(
 					'name' => $recipient->name(),
 					'email' => $recipient->email,
@@ -147,7 +147,7 @@ class Mandrill implements ServiceInterface {
 		if ( $message->reply_to ) {
 			$params['headers']['Reply-To'] = $message->reply_to->emailAddress();
 		}
-		
+
 		if ( $message->tags ) {
 			$params['tags'] = $message->tags;
 		}
@@ -158,15 +158,15 @@ class Mandrill implements ServiceInterface {
 	public function send( $message ) {
 
 		if ( ! $message->from ) {
-			throw new Exceptions\MessageMissingFrom;	
+			throw new Exceptions\MessageMissingFrom();
 		}
 
-		if ( !$message->html_body && !$message->text_body ) {
-			throw new Exceptions\MessageMissingBody;	
+		if ( ! $message->html_body && ! $message->text_body ) {
+			throw new Exceptions\MessageMissingBody();
 		}
 
 		if ( ! $message->subject ) {
-			throw new Exceptions\MessageMissingSubject;	
+			throw new Exceptions\MessageMissingSubject();
 		}
 
 		$params = $this->prepareSend( $message );
@@ -179,7 +179,6 @@ class Mandrill implements ServiceInterface {
 			$params['text'] = $message->text_body;
 		}
 
-
 		try {
 			do_action(
 				'log', 'debug', 'Mandrill send() invoked',
@@ -188,7 +187,7 @@ class Mandrill implements ServiceInterface {
 				)
 			);
 
-			$results =  $this->client->messages->send( $params );
+			$results = $this->client->messages->send( $params );
 
 			if ( ! is_array( $results ) || ! isset( $results[0]['status'] ) ) {
 				do_action(

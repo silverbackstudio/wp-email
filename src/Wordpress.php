@@ -196,7 +196,7 @@ class Wordpress {
 
 	}
 
-	public static function trackedMessages(){
+	public static function trackedMessages() {
 		return array(
 			'new_user_notification_email' => __( 'New User Welcome', 'svbk-email' ),
 			// 'user_request_action' => __( 'User Request Action', 'svbk-email' ),
@@ -204,7 +204,7 @@ class Wordpress {
 		);
 	}
 
-	public static function trackMessages(){
+	public static function trackMessages() {
 		add_filter( 'wp_new_user_notification_email' , array( self::class, 'track_wp_new_user_notification_email' ), 10, 3 );
 		add_filter( 'retrieve_password_key' , array( self::class, 'store_password_key' ), 10, 3 );
 		// add_filter( 'user_request_action_email_content', array( self::class, 'track_user_request_action' ), 10, 2 );
@@ -212,8 +212,8 @@ class Wordpress {
 		// add_filter( 'email_change_email', array( self::class, 'track_email_change_email' ), 10, 3 );
 	}
 
-	public static function getCommonData( $user = null ){
-		
+	public static function getCommonData( $user = null ) {
+
 		$data = array(
 			'ADMIN_EMAIL' => get_option( 'admin_email' ),
 			'SITENAME' => wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ),
@@ -230,49 +230,46 @@ class Wordpress {
 			$data['USER_NICENAME'] = $user['user_nicename'];
 			$data['USER_ID'] = $user['ID'];
 		}
-		
+
 		return $data;
 	}
 
-	public static function store_password_key( $key, $user ){
-		self::$last_email_data['PASSWORD_RESET_LINK'] = network_site_url("wp-login.php?action=rp&key=$key&login=" . rawurlencode($user->user_login), 'login');
-		
+	public static function store_password_key( $key, $user ) {
+		self::$last_email_data['PASSWORD_RESET_LINK'] = network_site_url( "wp-login.php?action=rp&key=$key&login=" . rawurlencode( $user->user_login ), 'login' );
+
 		return $key;
 	}
-	
-	public static function track_wp_new_user_notification_email( $params, $user ){
+
+	public static function track_wp_new_user_notification_email( $params, $user ) {
 		self::$last_email_id = 'new_user_notification_email';
-		
+
 		$new_params = $params;
-		
-		self::$last_email_data = array_merge( self::$last_email_data, self::getCommonData($user), $new_params );
+
+		self::$last_email_data = array_merge( self::$last_email_data, self::getCommonData( $user ), $new_params );
 		self::$last_email_content = $params['message'];
-		
+
 		return $params;
 	}
 
 	// public static function track_password_change_email( $pass_change_email, $user, $userdata ){
-	// 	self::$last_email_id = 'password_change_email';
-	// 	self::$last_email_data =  array_merge( self::getCommonData($user), $pass_change_email, $user, $userdata );
-	// 	self::$last_email_content = $email_text;
+	// self::$last_email_id = 'password_change_email';
+	// self::$last_email_data =  array_merge( self::getCommonData($user), $pass_change_email, $user, $userdata );
+	// self::$last_email_content = $email_text;
 	// }
-
 	// public static function track_email_change_email( $email_change_email, $user, $userdata ){
-	// 	self::$last_email_id = 'email_change_email';
-	// 	self::$last_email_data = $email_data;
-	// 	self::$last_email_content = $email_text;
-	// }	
-	
+	// self::$last_email_id = 'email_change_email';
+	// self::$last_email_data = $email_data;
+	// self::$last_email_content = $email_text;
+	// }
 	// public static function track_user_request_action( $email_text, $email_data ){
-	// 	self::$last_email_id = 'user_request_action';
-	// 	self::$last_email_data = $email_data;
-	// 	self::$last_email_content = $email_text;
-	// }		
-	
-	public static function clearTracker(){
+	// self::$last_email_id = 'user_request_action';
+	// self::$last_email_data = $email_data;
+	// self::$last_email_content = $email_text;
+	// }
+	public static function clearTracker() {
 		self::$last_email_id = '';
 		self::$last_email_data = null;
 		self::$last_email_content = null;
-	}		
+	}
 
 }

@@ -100,7 +100,7 @@ final class UtilsTest extends TestCase {
 		);
 
 		$contacts[] = new Contact( $attributes );
-		
+
 		$attributes = array(
 			'first_name' => 'First4',
 			'middle_name' => 'Middle4',
@@ -108,7 +108,7 @@ final class UtilsTest extends TestCase {
 			// 'email' => 'user4@example.com',
 		);
 
-		$contacts[] = new Contact( $attributes );		
+		$contacts[] = new Contact( $attributes );
 
 		$emails = Utils::extract( $contacts, 'first_name', 'email' );
 
