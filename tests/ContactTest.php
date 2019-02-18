@@ -172,5 +172,37 @@ final class ContactTest extends TestCase {
 
 	}
 
+	public function testNormalize() {
+
+		$attributes = array(
+			'first_name' => 'First',
+			'middle_name' => 'Middle',
+			'last_name' => 'Last',
+			'email' => 'user@example.com',
+		);
+
+		$contact = new Contact( $attributes );
+		
+		$this->assertEquals(
+			$contact,
+			Contact::normalize( $contact )
+		);
+		
+		$this->assertEquals(
+			$contact,
+			Contact::normalize( $contact->emailAddress() )
+		);		
+
+		$this->assertEquals(
+			$contact,
+			Contact::normalize( $attributes )
+		);	
+		
+		$this->assertNull(
+			Contact::normalize( (object)$attributes )
+		);			
+
+	}	
+
 
 }

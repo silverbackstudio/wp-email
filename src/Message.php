@@ -66,7 +66,19 @@ class Message {
 			return $this->headers;
 		}
 
-		return array_column( $this->headers, 'content', 'name' );
+		$headers = array();
+
+		foreach( $this->headers as $header ) {
+			
+			if ( array_key_exists( $header['name'], $headers ) ) {
+				$headers[$header['name']] .= ', ' . $header['content'];
+			} else {
+				$headers[$header['name']] = $header['content'];
+			}
+			
+		}
+
+		return $headers;
 	}
 
 	/**
@@ -83,14 +95,43 @@ class Message {
 	/**
 	 * Get all message attachments
 	 *
-	 * @param string $path The absolute file path
-	 *
 	 * @return string[]
 	 */
-	public function getAttachment() {
+	public function getAttachments() {
 		return $this->attachments;
 	}
+	
+	/**
+	 * Set a message attribute
+	 *
+	 * @param string $name  The attribute name
+	 * @param string $value The attribute balue
+	 *
+	 * @return void
+	 */
+	public function setAttribute( $name, $value ) {
+		$this->attributes[$name] = $value;
+	}
 
+	/**
+	 * Set multiple message attributes
+	 *
+	 * @param array $attributes The attribute key=>values to set
+	 *
+	 * @return void
+	 */
+	public function setAttributes( $attributes, $reset = false ) {
+		$this->attributes = array_replace($reset ? array() : $this->attributes, $attributes );
+	}	
+
+	/**
+	 * Get all message attributes
+	 *
+	 * @return array
+	 */
+	public function getAttributes() {
+		return $this->attributes;
+	}	
 
 	/**
 	 * Adds a message recipient

@@ -66,6 +66,72 @@ final class MessageTest extends TestCase {
 
 	}
 
+	public function testCanSetFrom() {
+
+		$message = new Message();
+
+		$attributes = array(
+			'first_name' => 'First',
+			'middle_name' => 'Middle',
+			'last_name' => 'Last',
+			'email' => 'user@example.com',
+		);
+
+		$contact = new Contact( $attributes );
+		
+		$message->setFrom( $contact );
+		$this->assertEquals(
+			$contact,
+			$message->from
+		);
+		
+		$message->setFrom( $contact->emailAddress() );
+		$this->assertEquals(
+			$contact,
+			$message->from
+		);		
+
+		$message->setFrom( $attributes );
+		$this->assertEquals(
+			$contact,
+			$message->from
+		);		
+
+	}
+	
+	public function testCanSetReplyTo() {
+
+		$message = new Message();
+
+		$attributes = array(
+			'first_name' => 'First',
+			'middle_name' => 'Middle',
+			'last_name' => 'Last',
+			'email' => 'user@example.com',
+		);
+
+		$contact = new Contact( $attributes );
+		
+		$message->setReplyTo( $contact );
+		$this->assertEquals(
+			$contact,
+			$message->reply_to
+		);
+		
+		$message->setFrom( $contact->emailAddress() );
+		$this->assertEquals(
+			$contact,
+			$message->reply_to
+		);		
+
+		$message->setFrom( $attributes );
+		$this->assertEquals(
+			$contact,
+			$message->reply_to
+		);		
+
+	}	
+
 	public function testCanSetRecipients() {
 
 		$message = new Message();
@@ -78,14 +144,6 @@ final class MessageTest extends TestCase {
 		);
 
 		$contact = new Contact( $attributes );
-
-		// Check Reply To
-		$message->setFrom( $contact->emailAddress() );
-
-		$this->assertEquals(
-			$contact,
-			$message->from
-		);
 
 		$message->addRecipient( $contact );
 
@@ -114,23 +172,7 @@ final class MessageTest extends TestCase {
 			$contact,
 			$message->bcc[0]
 		);
-
-		// Check Reply To
-		$message->setReplyTo( $contact );
-
-		$this->assertEquals(
-			$contact,
-			$message->reply_to
-		);
-
-		// Check Reply To From String
-		$message->setReplyTo( $contact->emailAddress() );
-
-		$this->assertEquals(
-			$contact,
-			$message->reply_to
-		);
-
+		
 	}
 
 	public function testCanAddBatchRecipients() {
@@ -162,6 +204,128 @@ final class MessageTest extends TestCase {
 		);
 
 	}
+	
+	public function testAttributes() {
 
+		$message = new Message();
+
+		$attributes1 = array(
+			'attr1' => 'val1',
+			'attr2' => 'val2',
+			'attr3' => 'val3',
+		);
+
+		$attributes2 = array(
+			'attr4' => 'val4',
+			'attr5' => 'val5',
+			'attr6' => 'val6',	
+		);
+
+		$this->assertIsArray(
+			$message->getAttributes()
+		);
+
+		$this->assertEmpty(
+			$message->getAttributes()
+		);
+	
+		$message->setAttributes( $attributes1 );
+		$this->assertEquals(
+			$attributes1,
+			$message->getAttributes()
+		);	
+		
+		$message->setAttributes( $attributes2 );
+		$this->assertEquals(
+			array(
+				'attr1' => 'val1',
+				'attr2' => 'val2',
+				'attr3' => 'val3',
+				'attr4' => 'val4',
+				'attr5' => 'val5',
+				'attr6' => 'val6',				
+			),
+			$message->getAttributes()
+		);			
+
+		$message->setAttributes( $attributes1, true );
+		$this->assertEquals(
+			$attributes1,
+			$message->getAttributes()
+		);
+		
+		$message->setAttribute( 'attr4', 'val4' );
+		$this->assertEquals(
+			array(
+				'attr1' => 'val1',
+				'attr2' => 'val2',
+				'attr3' => 'val3',
+				'attr4' => 'val4',
+			),
+			$message->getAttributes()
+		);		
+
+	}		
+	
+	public function testAttachments() {
+
+		$message = new Message();
+
+		$this->assertIsArray(
+			$message->getAttachments()
+		);
+
+		$this->assertEmpty(
+			$message->getAttachments()
+		);
+
+		$message->addAttachment( '/my/path/to/attachment1' );
+		$message->addAttachment( '/my/path/to/attachment2' );
+		
+		$this->assertEquals(
+			array(
+				'/my/path/to/attachment1',
+				'/my/path/to/attachment2'
+			),
+			$message->getAttachments()
+		);	
+
+	}	
+	
+	public function testHeaders() {
+
+		$message = new Message();
+
+		$this->assertIsArray(
+			$message->getHeaders()
+		);
+
+		$this->assertEmpty(
+			$message->getHeaders()
+		);
+
+		$message->addHeader( 'HeaderName', 'HeaderValue1' );
+		$message->addHeader( 'HeaderName', 'HeaderValue2' );
+		$message->addHeader( 'HeaderName3', 'HeaderValue3' );
+		
+		$this->assertEquals(
+			array(
+				'HeaderName' => 'HeaderValue1, HeaderValue2',
+				'HeaderName3' => 'HeaderValue3',
+			),
+			$message->getHeaders(true)
+		);	
+		
+		$this->assertEquals(
+			array(
+				['name' => 'HeaderName', 'content' => 'HeaderValue1' ],
+				['name' => 'HeaderName', 'content' => 'HeaderValue2' ],
+				['name' => 'HeaderName3', 'content' => 'HeaderValue3' ],
+			),
+			$message->getHeaders(false)
+		);	
+
+	}		
+	
 
 }
