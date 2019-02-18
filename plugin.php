@@ -17,32 +17,55 @@ Text Domain: svbk-email-services
 
 use Svbk\WP\Email;
 
+if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+	require_once __DIR__ . '/vendor/autoload.php';
+}
+
 function svbk_email_init() {
 	load_plugin_textdomain( 'svbk-email', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 	Email\Wordpress::trackMessages();
 }
-
 add_action( 'muplugins_loaded', 'svbk_email_init' );
 
-$sendinblue_config = SendinBlue\Client\Configuration::getDefaultConfiguration();
+// function svbk_email_test() {
+//     wp_new_user_notification(1, null, 'admin');
+// }
+// add_action( 'init', 'svbk_email_test' );
 
 
-if ( !function_exists( 'wp_mail' ) ) {
+$options = get_option( 'svbk_email_options' );
+
+if ( !empty($options['provider']) && !function_exists( 'wp_mail' ) ) {
 
 	function wp_mail( $to, $subject, $message, $headers = '', $attachments = array() ) {
-		$wp_email = new Email\Wordpress();
-		
+
+        $options = get_option( 'svbk_email_options' );
+	    $provider = empty($options['provider']) ? '' : $options['provider'];
+	    
+	    $wp_email = new Email\Wordpress();
 		$message = $wp_email->message( $to, $subject, $message, $headers = '', $attachments = array() );
 
-		$template = apply_filters( 'svbk_email_template', false, Email\Wordpress::$last_email_id );
+		$email_id = Email\Wordpress::$last_email_id;
 
-		$sendinblue = new  Email\Transactional\SendInBlue();
+        switch( $provider ){
+            case 'sendinblue':
+                $providerInstance = new  Email\Transactional\SendInBlue();  
+                break;
+            case 'mandrill':
+                $providerInstance = new  Email\Transactional\Mandrill();  
+                break;                
+        }
 
+        $template_key = 'template_' . $provider . '_' . $email_id;
+        $template = empty( $options[$template_key]) ? false : $options[$template_key];
+        
 		if ( $template ) {
-			$sendinblue->sendTemplate( $message, $template );
+		   $providerInstance->sendTemplate( apply_filters( 'svbk_email_template', $template ), $message, Email\Wordpress::$last_email_data ) ;
 		} else {
-			$sendinblue->send( $message, $template );
+		   $providerInstance->send( $message );
 		}
+		
+		return;
 	}
 }
 
@@ -51,10 +74,9 @@ function svbk_email_get_templates(){
     $result = wp_cache_get( 'svbk_email_templates' );
 
     if ( false === $result ) {
-        echo 'Caching MISS - SVBK TEMPLATES';
         $sendinblue = new  Email\Transactional\SendInBlue();
     	$result = $sendinblue->getTemplates();
-    	wp_cache_set( 'svbk_email_templates', $result, null, HOUR_IN_SECONDS );
+    	wp_cache_set( 'svbk_email_templates', $result, null, 5 * MINUTE_IN_SECONDS );
     } 
 
 	return $result;
@@ -96,6 +118,8 @@ add_action( 'admin_menu', 'svbk_email_options_page' );
  */
 function svbk_email_settings_init() {
 
+    $options = get_option( 'svbk_email_options' );
+
 	 // register a new setting for "svbk-email" page
 	 register_setting( 
 	     //option group
@@ -115,6 +139,7 @@ function svbk_email_settings_init() {
 		 //page
 		'svbk-email'
 	);
+	
 
 	add_settings_field(
 	    //id. As of WP 4.6 this value is used only internally, use $args' label_for to populate the id inside the callback
@@ -128,48 +153,65 @@ function svbk_email_settings_init() {
 		//section
 		'svbk_email_section_general',
 		[
-			'label_for' => 'svbk_email_provider',
+			'label_for' => 'provider',
 			'class' => 'svbk_email_row',
 		]
 	);
-	
-	add_settings_field(
-	    //id. As of WP 4.6 this value is used only internally, use $args' label_for to populate the id inside the callback
-		'svbk_email_default_template', 
-		//title
-		 __( 'Default Template', 'svbk-email' ),
-		 //callback
-		'svbk_email_field_select_template_cb',
-		//page
-		'svbk-email',
-		//section
-		'svbk_email_section_general',
-		[
-			'label_for' => 'svbk_email_default_template',
-			'class' => 'svbk_email_row',
-		]
-	);	
 
     $trackedMessages = Email\Wordpress::trackedMessages();
 	
-	foreach( $trackedMessages as $trackedMessage => $trackedMessageLabel ) { 
+	$provider = empty($options['provider']) ? '' : $options['provider'];
+	
+	if ( $provider ) {
+	  
+    	// register a new section in the "svbk-email" page
+    	add_settings_section(
+    	    // id
+    		'svbk_email_section_templates', 
+    		//title
+    		__( 'Templates', 'svbk-email' ),
+    		 //callback
+    		'svbk_email_section_templates_cb',
+    		 //page
+    		'svbk-email'
+    	);		    
+	  
 	
     	add_settings_field(
     	    //id. As of WP 4.6 this value is used only internally, use $args' label_for to populate the id inside the callback
-    		'svbk_email_template_' . $trackedMessage, 
+    		'svbk_email_default_template', 
     		//title
-    		 sprintf( __( '%s Template', 'svbk-email' ), $trackedMessageLabel) ,
+    		 __( 'Default Template', 'svbk-email' ),
     		 //callback
     		'svbk_email_field_select_template_cb',
     		//page
     		'svbk-email',
     		//section
-    		'svbk_email_section_general',
+    		'svbk_email_section_templates',
     		[
-    			'label_for' => 'svbk_email_template_' . $trackedMessage,
+    			'label_for' => 'default_' . $provider . '_template',
     			'class' => 'svbk_email_row',
     		]
-    	);		
+    	);		  
+	    
+    	foreach( $trackedMessages as $trackedMessage => $trackedMessageLabel ) { 
+        	add_settings_field(
+        	    //id. As of WP 4.6 this value is used only internally, use $args' label_for to populate the id inside the callback
+        		'svbk_email_template_' . $trackedMessage, 
+        		//title
+        		 $trackedMessageLabel,
+        		 //callback
+        		'svbk_email_field_select_template_cb',
+        		//page
+        		'svbk-email',
+        		//section
+        		'svbk_email_section_templates',
+        		[
+        			'label_for' => 'template_' . $provider . '_'. $trackedMessage,
+        			'class' => 'svbk_email_row',
+        		]
+        	);		
+    	}
 	}
 }
 
@@ -183,12 +225,13 @@ add_action( 'admin_init', 'svbk_email_settings_init' );
  * callback functions
  */
 
-// developers section cb
-// section callbacks can accept an $args parameter, which is an array.
-// $args have the following keys defined: title, id, callback.
-// the values are defined at the add_settings_section() function.
 function svbk_email_section_general_cb( $args ) { ?>
      <p id="<?php echo esc_attr( $args['id'] ); ?>"><?php esc_html_e( 'Choose wich provider you want to use to send emails', 'svbk-email' ); ?></p>
+	<?php
+}
+
+function svbk_email_section_templates_cb( $args ) { ?>
+     <p id="<?php echo esc_attr( $args['id'] ); ?>"><?php esc_html_e( 'Choose which template should be used', 'svbk-email' ); ?></p>
 	<?php
 }
 
@@ -196,16 +239,20 @@ function svbk_email_section_general_cb( $args ) { ?>
 function svbk_email_field_provider_cb( $args ) {
 	// get the value of the setting we've registered with register_setting()
 	$options = get_option( 'svbk_email_options' );
+
 	// output the field
 	?>
      <select id="<?php echo esc_attr( $args['label_for'] ); ?>"
      name="svbk_email_options[<?php echo esc_attr( $args['label_for'] ); ?>]"
      >
-         <option value="sendinblue" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'red', false ) ) : ( '' ); ?>>
+         <option value="" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], '', false ) ) : ( '' ); ?>>
+        	<?php esc_html_e( '-- Core --', 'svbk-email' ); ?>
+         </option>
+         <option value="sendinblue" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'sendinblue', false ) ) : ( '' ); ?>>
         	<?php esc_html_e( 'Sendinblue', 'svbk-email' ); ?>
          </option>
-         <option value="mailchimp" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'blue', false ) ) : ( '' ); ?>>
-        	<?php esc_html_e( 'Mailchimp', 'svbk-email' ); ?>
+         <option value="mandrill" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'mandrill', false ) ) : ( '' ); ?>>
+        	<?php esc_html_e( 'Mandrill', 'svbk-email' ); ?>
          </option>
      </select>
 	<?php
