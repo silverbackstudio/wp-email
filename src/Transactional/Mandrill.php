@@ -28,8 +28,8 @@ class Mandrill implements ServiceInterface {
 		$this->client = new Mandrill_Client( $api_key );
 	}
 
-	public function sendTemplate( $message, $template, $attributes = array() ) {
-		$params = $this->messageParams( $message );
+	public function sendTemplate( $template, $message, $attributes = array() ) {
+		$params = $this->prepareSend( $message );
 
 		$attributes = array_merge( $message->getAttributes(), $attributes );
 		$uc_attributes = array();
@@ -93,7 +93,7 @@ class Mandrill implements ServiceInterface {
 
 	}
 
-	protected function messageParams( $message ) {
+	public function prepareSend( $message ) {
 
 		$params = array();
 
@@ -101,38 +101,53 @@ class Mandrill implements ServiceInterface {
 			$params['subject'] = $message->subject;
 		}
 
-		if ( $message->to ) {
-			$params['to'][] = array(
-				'name' => $message->to->name(),
-				'email' => $message->to->email,
-				'type' => 'to',
-			);
+		if ( !empty( $message->to ) ) {
+			foreach( $message->to as $recipient  ) {
+				$params['to'][] = array(
+					'name' => $recipient->name(),
+					'email' => $recipient->email,
+					'type' => 'to',
+				);
+			}
+		} else {
+			throw new Exceptions\MessageMissingTo;
 		}
 
 		if ( $message->from ) {
 			$params['from_email'] = $message->from->email;
 		}
 
-		if ( $message->cc ) {
-			$params['to'][] = array(
-				'name' => $message->cc->name(),
-				'email' => $message->cc->email,
-				'type' => 'cc',
-			);
+		if ( !empty( $message->cc ) ) {
+			foreach( $message->cc as $recipient  ) {
+				$params['to'][] = array(
+					'name' => $recipient->name(),
+					'email' => $recipient->email,
+					'type' => 'cc',
+				);
+			}
 		}
 
-		if ( $message->bcc ) {
-			$params['to'][] = array(
-				'name' => $message->bcc->name(),
-				'email' => $message->bcc->email,
-				'type' => 'bcc',
-			);
+		if ( !empty( $message->bcc ) ) {
+			foreach( $message->bcc as $recipient  ) {
+				$params['to'][] = array(
+					'name' => $recipient->name(),
+					'email' => $recipient->email,
+					'type' => 'bcc',
+				);
+			}
+		}
+
+		$params['headers'] = array();
+
+		$headers = $message->getHeaders( true );
+		if ( ! empty( $headers ) ) {
+			$params['headers'] = $headers;
 		}
 
 		if ( $message->reply_to ) {
 			$params['headers']['Reply-To'] = $message->reply_to->emailAddress();
 		}
-
+		
 		if ( $message->tags ) {
 			$params['tags'] = $message->tags;
 		}
@@ -142,7 +157,19 @@ class Mandrill implements ServiceInterface {
 
 	public function send( $message ) {
 
-		$params = $this->messageParams( $message );
+		if ( ! $message->from ) {
+			throw new Exceptions\MessageMissingFrom;	
+		}
+
+		if ( !$message->html_body && !$message->text_body ) {
+			throw new Exceptions\MessageMissingBody;	
+		}
+
+		if ( ! $message->subject ) {
+			throw new Exceptions\MessageMissingSubject;	
+		}
+
+		$params = $this->prepareSend( $message );
 
 		if ( $message->html_body ) {
 			$params['html'] = $message->html_body;
@@ -152,6 +179,7 @@ class Mandrill implements ServiceInterface {
 			$params['text'] = $message->text_body;
 		}
 
+
 		try {
 			do_action(
 				'log', 'debug', 'Mandrill send() invoked',
@@ -160,7 +188,7 @@ class Mandrill implements ServiceInterface {
 				)
 			);
 
-			$results = $mandrill->messages->send( $params );
+			$results =  $this->client->messages->send( $params );
 
 			if ( ! is_array( $results ) || ! isset( $results[0]['status'] ) ) {
 				do_action(
