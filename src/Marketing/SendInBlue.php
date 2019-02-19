@@ -5,6 +5,8 @@ use Svbk\WP\Email\Contact;
 use Exception;
 use DateTime;
 use SendinBlue\Client as SendInBlue_Client;
+use Svbk\WP\Email\Utils;
+use GuzzleHttp;
 
 class SendInBlue extends ServiceInterface {
 
