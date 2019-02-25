@@ -234,8 +234,8 @@ class Wordpress {
 		return $data;
 	}
 
-	public static function store_password_key( $key, $user ) {
-		self::$last_email_data['PASSWORD_RESET_LINK'] = network_site_url( "wp-login.php?action=rp&key=$key&login=" . rawurlencode( $user->user_login ), 'login' );
+	public static function store_password_key( $user_login, $key ) {
+		self::$last_email_data['PASSWORD_RESET_LINK'] = network_site_url( "wp-login.php?action=rp&key=$key&login=" . rawurlencode( $user_login ), 'login' );
 
 		return $key;
 	}
