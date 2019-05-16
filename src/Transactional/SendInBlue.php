@@ -197,7 +197,7 @@ class SendInBlue implements ServiceInterface {
 		}
 
 		if ( ! empty( $template ) ) {
-			$sendSmtpEmail->setTemplateId( $template );
+			$sendSmtpEmail->setTemplateId( intval( $template )  );
 		}
 
 		// $attachments = $message->getAttachments();
