@@ -53,7 +53,7 @@ class SendInBlue implements ServiceInterface {
 	}
 
 	public function sendTemplate( $template, $message, $attributes = array() ) {
-
+        
 		do_action(
 			'log', 'debug', 'SendinBlue sendTemplate() invoked',
 			array(
@@ -62,44 +62,7 @@ class SendInBlue implements ServiceInterface {
 			)
 		);
 
-		$message->setAttributes( $attributes );
-
-		$sendEmail = $this->prepareSendTemplate( $message );
-
-		try {
-			$result = $this->smtp_client->sendTemplate( $template, $sendEmail );
-		} catch ( SendInBlue_Client\ApiException $e ) {
-
-			do_action(
-				'log', 'error', 'Sendinblue sendTemplate() API request error',
-				array(
-					'error' => $e->getResponseBody(),
-				)
-			);
-
-			throw new Exceptions\ServiceError( $e->getResponseBody() );
-		} catch ( Exception $e ) {
-
-			do_action(
-				'log', 'error', 'Sendinblue sendTemplate() generic request error',
-				array(
-					'error' => $e->getMessage(),
-				)
-			);
-
-			throw new Exceptions\ServiceError( $e->getMessage() );
-		}
-
-		do_action(
-			'log', 'info', 'Sendinblue sendTemplate() successful',
-			array(
-				'result' => $result,
-			)
-		);
-
-		$message_id = $result->getMessageId();
-
-		return $message_id ?: true;
+		return $this->send( $message, $template, $attributes );
 	}
 
 
@@ -121,8 +84,10 @@ class SendInBlue implements ServiceInterface {
 		$sendSmtpEmail = $this->prepareSend( $message, $template );
 
 		try {
-			$result = $this->smtp_client->sendTransacEmail( $sendSmtpEmail );
+		    $result = $this->smtp_client->sendTransacEmail( $sendSmtpEmail );
 		} catch ( SendInBlue_Client\ApiException $e ) {
+
+			$error = json_decode( $e->getResponseBody() );
 
 			do_action(
 				'log', 'error', 'Sendinblue send() API request error',
@@ -131,7 +96,7 @@ class SendInBlue implements ServiceInterface {
 				)
 			);
 
-			throw new Exceptions\ServiceError( $e->getResponseBody() );
+			throw new Exceptions\ServiceError( $error->message );
 
 		} catch ( Exception $e ) {
 
@@ -152,50 +117,12 @@ class SendInBlue implements ServiceInterface {
 				'result' => $result,
 			)
 		);
-
-		$message_id = $result->getMessageId();
-
-		return $message_id ?: true;
-
+        
+	    $message_id = $result->getMessageId();
+		
+	    return $message_id ?: true;
 	}
 
-	public function prepareSendTemplate( $message ) {
-
-		$sendEmail = new SendInBlue_Client\Model\SendEmail();
-
-		if ( ! empty( $message->to ) ) {
-			$sendEmail->setEmailTo( Utils::extract( $message->to, 'email' ) );
-		} else {
-			throw new Exceptions\MessageMissingTo();
-		}
-
-		if ( ! empty( $message->cc ) ) {
-			$sendEmail->setEmailCc( Utils::extract( $message->cc, 'email' ) );
-		}
-
-		if ( ! empty( $message->bcc ) ) {
-			$sendEmail->setEmailBcc( Utils::extract( $message->bcc, 'email' ) );
-		}
-
-		if ( $message->reply_to ) {
-			$sendEmail->setReplyTo( $message->reply_to->email );
-		}
-
-		if ( ! empty( $message->getAttributes() ) ) {
-			$sendEmail->setAttributes( $message->getAttributes() );
-		}
-
-		$headers = $message->getHeaders( true );
-		if ( ! empty( $headers ) ) {
-			$sendEmail->setHeaders( $headers );
-		}
-
-		if ( ! empty( $message->tags ) ) {
-			$sendEmail->setTags( $message->tags );
-		}
-
-		return $sendEmail;
-	}
 
 	public function prepareSend( $message, $template = null ) {
 
@@ -212,7 +139,8 @@ class SendInBlue implements ServiceInterface {
 			$sender->setEmail( $message->from->email );
 			$sender->setName( $message->from->name() ?: null );
 			$sendSmtpEmail->setSender( $sender );
-		} else {
+			
+		} elseif ( !$template ) {
 			throw new Exceptions\MessageMissingFrom();
 		}
 
@@ -239,11 +167,11 @@ class SendInBlue implements ServiceInterface {
 
 		if ( $message->subject ) {
 			$sendSmtpEmail->setSubject( $message->subject );
-		} else {
+		} elseif ( !$template ) {
 			throw new Exceptions\MessageMissingSubject();
 		}
 
-		if ( ! $message->html_body && ! $message->text_body ) {
+		if ( ! $message->html_body && ! $message->text_body && !$template ) {
 			throw new Exceptions\MessageMissingBody();
 		}
 

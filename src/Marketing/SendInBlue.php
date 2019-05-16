@@ -90,8 +90,8 @@ class SendInBlue extends ServiceInterface {
 			$raw_result = $this->client_contacts->createContact( $createContact );
 
 		} catch ( SendInBlue_Client\ApiException $e ) {
-
-			$error = $e->getResponseBody();
+			
+			$error = json_decode( $e->getResponseBody() );
 
 			if ( 'duplicate_parameter' === $error->code ) {
 				do_action( 'log', 'notice', 'Sendinblue createContact() API duplicate contact found' );
@@ -106,7 +106,7 @@ class SendInBlue extends ServiceInterface {
 				)
 			);
 
-			throw new Exceptions\ServiceError( $e->getResponseBody()->message );
+			throw new Exceptions\ServiceError( $error->message );
 		} catch ( Exception $e ) {
 
 			do_action(
@@ -148,7 +148,7 @@ class SendInBlue extends ServiceInterface {
 			$raw_result = $this->client_contacts->getContactInfo( $search_contact->email );
 		} catch ( SendInBlue_Client\ApiException $e ) {
 
-			$error = $e->getResponseBody();
+			$error = json_decode( $e->getResponseBody() );
 
 			if ( 'document_not_found' === $error->code ) {
 				do_action(
@@ -167,7 +167,7 @@ class SendInBlue extends ServiceInterface {
 				)
 			);
 
-			throw new Exceptions\ServiceError( $e->getResponseBody()->message );
+			throw new Exceptions\ServiceError( $error->message );
 
 		} catch ( Exception $e ) {
 			do_action(
@@ -243,7 +243,7 @@ class SendInBlue extends ServiceInterface {
 			$raw_result = $this->client_contacts->updateContact( $contact->email, $updateContact );
 		} catch ( SendInBlue_Client\ApiException $e ) {
 
-			$error = $e->getResponseBody();
+			$error = json_decode( $e->getResponseBody() );
 
 			if ( 'document_not_found' === $error->code ) {
 				do_action(
@@ -261,10 +261,10 @@ class SendInBlue extends ServiceInterface {
 					'error' => $error,
 				)
 			);
-
-			throw new Exceptions\ServiceError( $e->getResponseBody()->message );
+            
+            throw new Exceptions\ServiceError( $error->message );
 		} catch ( Exception $e ) {
-
+			
 			do_action(
 				'log', 'error', 'Sendinblue saveContact() API request general error',
 				array(
