@@ -67,7 +67,7 @@ class Mandrill implements ServiceInterface {
 					)
 				);
 
-				throw new Exceptions\ServiceError( __( 'The requesto to our mail server failed, please try again later or contact the site owner.', svbk-email ) );
+				throw new Exceptions\ServiceError( __( 'The requesto to our mail server failed, please try again later or contact the site owner.', 'svbk-email' ) );
 			}
 
 			$this->throwErrors( $results );
@@ -197,7 +197,7 @@ class Mandrill implements ServiceInterface {
 					)
 				);
 
-				throw new Exceptions\ServiceError( __( 'The requesto to our mail server failed, please try again later or contact the site owner.', svbk-email ) );
+				throw new Exceptions\ServiceError( __( 'The requesto to our mail server failed, please try again later or contact the site owner.', 'svbk-email' ) );
 			}
 
 			$this->throwErrors( $results );
@@ -278,7 +278,7 @@ class Mandrill implements ServiceInterface {
 							)
 						);
 
-						throw new Exceptions\EmailReject( sprintf( __( 'This email address has beeing rejected for an unknown reason [%s]. Please use another email address.', svbk-email ), $result['reject_reason'] ) );
+						throw new Exceptions\EmailReject( sprintf( __( 'This email address has beeing rejected for an unknown reason [%s]. Please use another email address.', 'svbk-email' ), $result['reject_reason'] ) );
 				}
 			}
 
