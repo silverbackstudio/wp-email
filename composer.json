@@ -21,7 +21,6 @@
     "require": {
         "drewm/mailchimp-api": "^2.4",
         "mandrill/mandrill": "^1.0",
-        "getresponse/getresponse": "^0.0.2",
         "sendinblue/api-v3-sdk": "^6.0.0"
     },
     "require-dev": {
