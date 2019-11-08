@@ -32,7 +32,7 @@
     "scripts": {
         "test": [
           "vendor/bin/phpcs src",
-          "vendor/bin/phpunit --bootstrap vendor/autoload.php --color tests"
+          "vendor/bin/phpunit --bootstrap ../../../wp/wp-load.php --color tests"
         ],        
         "beautify": [
           "vendor/bin/phpcbf src"

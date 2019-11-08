@@ -90,7 +90,7 @@ class SendInBlue extends ServiceInterface {
 			$raw_result = $this->client_contacts->createContact( $createContact );
 
 		} catch ( SendInBlue_Client\ApiException $e ) {
-			
+
 			$error = json_decode( $e->getResponseBody() );
 
 			if ( 'duplicate_parameter' === $error->code ) {
@@ -261,10 +261,10 @@ class SendInBlue extends ServiceInterface {
 					'error' => $error,
 				)
 			);
-            
-            throw new Exceptions\ServiceError( $error->message );
+
+			throw new Exceptions\ServiceError( $error->message );
 		} catch ( Exception $e ) {
-			
+
 			do_action(
 				'log', 'error', 'Sendinblue saveContact() API request general error',
 				array(

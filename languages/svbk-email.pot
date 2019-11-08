@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Silverback Email Services\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-18 14:29+0000\n"
+"POT-Creation-Date: 2019-11-08 15:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -15,80 +15,168 @@ msgstr ""
 "X-Generator: Loco https://localise.biz/\n"
 "X-Loco-Version: 2.2.0; wp-5.0.3"
 
-#: plugin.php:243
-msgid "-- Core --"
+#: plugin.php:152
+msgid ""
+"No email keys configured or invalid configuration. No email will be sent."
 msgstr ""
 
-#: plugin.php:267
-msgid "-- No Template --"
+#: plugin.php:153 plugin.php:164
+msgid "Settings"
 msgstr ""
 
-#: plugin.php:228
-msgid "Choose which template should be used"
-msgstr ""
-
-#: plugin.php:223
-msgid "Choose wich provider you want to use to send emails"
-msgstr ""
-
-#. title
-#: plugin.php:178
-msgid "Default Template"
+#: plugin.php:163
+msgid ""
+"There is no email provider configured, using server \"mail()\" function. "
+"Please check if email are working."
 msgstr ""
 
 #. title
-#: plugin.php:142
+#: plugin.php:191
+msgid "General Settings"
+msgstr ""
+
+#. title
+#: plugin.php:203
+msgid "From"
+msgstr ""
+
+#. title
+#: plugin.php:220
 msgid "Email Provider"
 msgstr ""
 
 #. title
-#: plugin.php:130
-msgid "General Settings"
+#: plugin.php:241
+msgid "Provider Api Key"
 msgstr ""
 
-#. Author URI of the plugin
-msgid "http://www.silverbackstudio.it/"
+#. title
+#: plugin.php:262
+msgid "Templates"
 msgstr ""
 
-#. URI of the plugin
-msgid "https://github.com/silverbackstudio/wp-email"
+#. title
+#: plugin.php:274
+msgid "Default Template"
 msgstr ""
 
-#: plugin.php:249
+#: plugin.php:319
+msgid "Choose wich provider you want to use to send emails"
+msgstr ""
+
+#: plugin.php:324
+msgid "Choose which template should be used"
+msgstr ""
+
+#: plugin.php:339
+msgid "-- Core --"
+msgstr ""
+
+#: plugin.php:342
+msgid "Sendinblue"
+msgstr ""
+
+#: plugin.php:345
 msgid "Mandrill"
+msgstr ""
+
+#: plugin.php:377
+msgid "Enter from name.."
+msgstr ""
+
+#: plugin.php:383
+msgid "Enter from email.."
+msgstr ""
+
+#: plugin.php:402
+msgid "-- No Template --"
+msgstr ""
+
+#: plugin.php:424
+msgid "Settings Saved"
 msgstr ""
 
 #: src/Wordpress.php:201
 msgid "New User Welcome"
 msgstr ""
 
-#. Description of the plugin
-msgid "Send Wordpress emails through Email Services API with templates"
+#: src/Marketing/NullService.php:21
+msgid ""
+"Warning: A Form hasn't been configured to subscribe users, please check form "
+"configuration"
 msgstr ""
 
-#: plugin.php:246
-msgid "Sendinblue"
+#: src/Transactional/Mandrill.php:75 src/Transactional/Mandrill.php:205
+msgid ""
+"The requesto to our mail server failed, please try again later or contact "
+"the site owner."
 msgstr ""
 
-#: plugin.php:289
-msgid "Settings Saved"
+#: src/Transactional/Mandrill.php:286
+#, php-format
+msgid ""
+"This email address has beeing rejected for an unknown reason [%s]. Please "
+"use another email address."
 msgstr ""
 
-#. Name of the plugin
-msgid "Silverback Email Services"
+#: src/Transactional/NullService.php:23
+msgid ""
+"Warning: A Form hasn't been configured to send emails, please check form "
+"configuration"
 msgstr ""
 
-#. Author of the plugin
-msgid "Silverback Studio"
+#: src/Marketing/Exceptions/ApiKeyInvalid.php:13
+#: src/Transactional/Exceptions/ApiKeyInvalid.php:13
+msgid "Please specify an API key"
 msgstr ""
 
-#. title
-#: plugin.php:166
-msgid "Templates"
+#: src/Marketing/Exceptions/ContactAlreadyExists.php:13
+msgid "Contact already exists"
 msgstr ""
 
-#: src/Transactional/Exceptions/MessageMissingFrom.php:13
-msgid "Your email has no \"from\" address. Please specify one."
+#: src/Marketing/Exceptions/ContactNotExists.php:13
+msgid "Contact does not exists"
+msgstr ""
+
+#: src/Transactional/Exceptions/EmailReject.php:13
+#: src/Transactional/Exceptions/EmailRejectRule.php:13
+msgid ""
+"This address has beed rejected, this sometimes is due to multiple tries to "
+"send to a full or disabled inbox. Please try again later"
+msgstr ""
+
+#: src/Transactional/Exceptions/EmailRejectHardBounce.php:13
+msgid ""
+"The mailbox is non existent or disabled. Please check your email address is "
+"correct or your contact your mailbox provider."
+msgstr ""
+
+#: src/Transactional/Exceptions/EmailRejectInvalidAddress.php:13
+msgid "Your email address is invalid. Please check the address or use another."
+msgstr ""
+
+#: src/Transactional/Exceptions/EmailRejectInvalidSender.php:13
+msgid "Invalid sender address."
+msgstr ""
+
+#: src/Transactional/Exceptions/EmailRejectSoftBounce.php:13
+msgid ""
+"Your mailbox isn't accepting our message. Please check your if mailbox your "
+"mailbox is full."
+msgstr ""
+
+#: src/Transactional/Exceptions/EmailRejectSpam.php:13
+msgid ""
+"Your mailbox is reporting our message as spam. Please add our domain to "
+"trusted senders or contact the website tech support"
+msgstr ""
+
+#: src/Transactional/Exceptions/EmailRejectTestAccount.php:13
+msgid "This email address is a test account."
+msgstr ""
+
+#: src/Transactional/Exceptions/EmailRejectTestLimit.php:13
+msgid "The test mode sending limit is beeing reached."
 msgstr ""
 
 #: src/Transactional/Exceptions/MessageMissingBody.php:13
@@ -97,6 +185,34 @@ msgid ""
 "html_content"
 msgstr ""
 
+#: src/Transactional/Exceptions/MessageMissingFrom.php:13
+msgid "Your email has no \"from\" address. Please specify one."
+msgstr ""
+
 #: src/Transactional/Exceptions/MessageMissingSubject.php:13
 msgid "Your email has no subject. Please specify one."
+msgstr ""
+
+#: src/Transactional/Exceptions/MessageMissingTo.php:13
+msgid "Your email has no \"to\" recipient. Please specify one."
+msgstr ""
+
+#. Name of the plugin
+msgid "Silverback Email Services"
+msgstr ""
+
+#. Description of the plugin
+msgid "Send Wordpress emails through Email Services API with templates"
+msgstr ""
+
+#. URI of the plugin
+msgid "https://github.com/silverbackstudio/wp-email"
+msgstr ""
+
+#. Author of the plugin
+msgid "Silverback Studio"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "http://www.silverbackstudio.it/"
 msgstr ""
