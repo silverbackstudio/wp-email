@@ -6,13 +6,13 @@
  */
 
 /**
-Plugin Name: Silverback Email Services
-Plugin URI: https://github.com/silverbackstudio/wp-email
-Description: Send Wordpress emails through Email Services API with templates
-Author: Silverback Studio
-Version: 2.0
-Author URI: http://www.silverbackstudio.it/
-Text Domain: svbk-email
+* Plugin Name: Silverback Email Services
+* Plugin URI: https://github.com/silverbackstudio/wp-email
+* Description: Send Wordpress emails through Email Services API with templates
+* Author: Silverback Studio
+* Version: 2.2.0
+* Author URI: http://www.silverbackstudio.it/
+* Text Domain: svbk-email
 */
 
 use Svbk\WP\Email;
