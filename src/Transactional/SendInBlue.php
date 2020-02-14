@@ -15,6 +15,7 @@ class SendInBlue implements ServiceInterface {
 	public $smtp_client;
 
 	const TEMPLATE_SUPPORT = true;
+	const SERVICE_NAME = 'sendinblue';
 
 	public function __construct( $api_key = null, $config = null, $httpClient = null ) {
 
@@ -39,7 +40,11 @@ class SendInBlue implements ServiceInterface {
 		}
 
 		if ( ! $httpClient ) {
-			$httpClient = new GuzzleHttp\Client();
+			$httpClient = new GuzzleHttp\Client(
+				[
+					'timeout' => 2,
+				]
+			);
 		}
 
 		$this->smtp_client = new SendInBlue_Client\Api\SMTPApi(
@@ -52,8 +57,12 @@ class SendInBlue implements ServiceInterface {
 		$this->config->setApiKey( 'api-key', $api_key );
 	}
 
+	public function getApiKey() {
+		return $this->config->getApiKey( 'api-key' );
+	}
+
 	public function sendTemplate( $template, $message, $attributes = array() ) {
-        
+
 		do_action(
 			'log', 'debug', 'SendinBlue sendTemplate() invoked',
 			array(
@@ -84,7 +93,7 @@ class SendInBlue implements ServiceInterface {
 		$sendSmtpEmail = $this->prepareSend( $message, $template );
 
 		try {
-		    $result = $this->smtp_client->sendTransacEmail( $sendSmtpEmail );
+			$result = $this->smtp_client->sendTransacEmail( $sendSmtpEmail );
 		} catch ( SendInBlue_Client\ApiException $e ) {
 
 			$error = json_decode( $e->getResponseBody() );
@@ -117,10 +126,10 @@ class SendInBlue implements ServiceInterface {
 				'result' => $result,
 			)
 		);
-        
-	    $message_id = $result->getMessageId();
-		
-	    return $message_id ?: true;
+
+		$message_id = $result->getMessageId();
+
+		return $message_id ?: true;
 	}
 
 
@@ -139,8 +148,8 @@ class SendInBlue implements ServiceInterface {
 			$sender->setEmail( $message->from->email );
 			$sender->setName( $message->from->name() ?: null );
 			$sendSmtpEmail->setSender( $sender );
-			
-		} elseif ( !$template ) {
+
+		} elseif ( ! $template ) {
 			throw new Exceptions\MessageMissingFrom();
 		}
 
@@ -167,11 +176,11 @@ class SendInBlue implements ServiceInterface {
 
 		if ( $message->subject ) {
 			$sendSmtpEmail->setSubject( $message->subject );
-		} elseif ( !$template ) {
+		} elseif ( ! $template ) {
 			throw new Exceptions\MessageMissingSubject();
 		}
 
-		if ( ! $message->html_body && ! $message->text_body && !$template ) {
+		if ( ! $message->html_body && ! $message->text_body && ! $template ) {
 			throw new Exceptions\MessageMissingBody();
 		}
 
@@ -197,7 +206,7 @@ class SendInBlue implements ServiceInterface {
 		}
 
 		if ( ! empty( $template ) ) {
-			$sendSmtpEmail->setTemplateId( intval( $template )  );
+			$sendSmtpEmail->setTemplateId( intval( $template ) );
 		}
 
 		// $attachments = $message->getAttachments();

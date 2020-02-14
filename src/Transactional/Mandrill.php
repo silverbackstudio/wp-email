@@ -13,6 +13,7 @@ class Mandrill implements ServiceInterface {
 	public $client;
 
 	const TEMPLATE_SUPPORT = true;
+	const SERVICE_NAME = 'mandrill';
 
 	public function __construct( $api_key ) {
 		$this->setApiKey( $api_key );
@@ -26,6 +27,10 @@ class Mandrill implements ServiceInterface {
 		}
 
 		$this->client = new Mandrill_Client( $api_key );
+	}
+
+	public function getApiKey() {
+		return $this->client->apikey;
 	}
 
 	public function sendTemplate( $template, $message, $attributes = array() ) {

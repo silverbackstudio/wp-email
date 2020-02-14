@@ -164,30 +164,6 @@ final class SendinblueTransactionalTest extends TestCase {
 
 	}
 
-	public function testCanPrepareEmptyTemplateMessage() {
-
-		$sendinblue = new SendInBlue( 'api-key' );
-		$message = new Message();
-
-		$this->setupMessage( $message );
-
-		$message->html_body = '';
-		$message->text_body = '';
-		$message->subject = '';
-
-		$sentSmtpEmail = $sendinblue->prepareSendTemplate( $message );
-
-		$this->assertNull( $sentSmtpEmail->getEmailCc() );
-		$this->assertNull( $sentSmtpEmail->getEmailBcc() );
-		$this->assertNull( $sentSmtpEmail->getReplyTo() );
-		$this->assertNull( $sentSmtpEmail->getHeaders() );
-		$this->assertNull( $sentSmtpEmail->getAttachment() );
-		$this->assertNull( $sentSmtpEmail->getHeaders() );
-		$this->assertNull( $sentSmtpEmail->getAttributes() );
-		$this->assertNull( $sentSmtpEmail->getTags() );
-
-	}
-
 	public function testCanPrepareMessageFrom() {
 
 		$sendinblue = new SendInBlue( 'api-key' );
@@ -235,11 +211,6 @@ final class SendinblueTransactionalTest extends TestCase {
 		$this->assertEquals( 'reply-to@example.com', $reply_to->getEmail() );
 		$this->assertEquals( 'My ReplyTo', $reply_to->getName() );
 
-		$sendEmail = $sendinblue->prepareSendTemplate( $message );
-
-		$reply_to = $sendEmail->getReplyTo();
-		$this->assertIsNotArray( $reply_to );
-		$this->assertEquals( 'reply-to@example.com', $reply_to );
 	}
 
 	public function testCanPrepareMessageRecipients() {
@@ -284,20 +255,6 @@ final class SendinblueTransactionalTest extends TestCase {
 		$this->assertContainsOnly( SendinBlue_Client\Model\SendSmtpEmailBcc::class, $bcc );
 		$this->assertEquals( 'bcc@example.com', $bcc[0]->getEmail() );
 		$this->assertEquals( 'My BCC', $bcc[0]->getName() );
-
-		$sendEmail = $sendinblue->prepareSendTemplate( $message );
-
-		$to = $sendEmail->getEmailTo();
-		$this->assertCount( 2, $to );
-		$this->assertEquals( 'to@example.com', $to[0] );
-
-		$cc = $sendEmail->getEmailCc();
-		$this->assertCount( 1, $cc );
-		$this->assertEquals( 'cc@example.com', $cc[0] );
-
-		$bcc = $sendEmail->getEmailBcc();
-		$this->assertCount( 1, $bcc );
-		$this->assertEquals( 'bcc@example.com', $bcc[0] );
 	}
 
 	public function testCanPrepareMessageSubject() {
@@ -351,15 +308,6 @@ final class SendinblueTransactionalTest extends TestCase {
 			],
 			$sentSmtpEmail->getHeaders()
 		);
-
-		$sendEmail = $sendinblue->prepareSendTemplate( $message );
-		$this->assertEquals(
-			[
-				'MyHeaderName1' => 'My Header1 Value',
-				'MyHeaderName2' => 'My Header2 Value',
-			],
-			$sendEmail->getHeaders()
-		);
 	}
 
 	public function testCanPrepareMessageTags() {
@@ -374,9 +322,6 @@ final class SendinblueTransactionalTest extends TestCase {
 
 		$sentSmtpEmail = $sendinblue->prepareSend( $message );
 		$this->assertEquals( $tags, $sentSmtpEmail->getTags() );
-
-		$sendEmail = $sendinblue->prepareSendTemplate( $message );
-		$this->assertEquals( $tags, $sendEmail->getTags() );
 	}
 
 	public function testCanPrepareMessageAttributes() {
@@ -396,10 +341,6 @@ final class SendinblueTransactionalTest extends TestCase {
 
 		$sentSmtpEmail = $sendinblue->prepareSend( $message );
 		$this->assertEquals( $attributes, $sentSmtpEmail->getParams() );
-
-		$sendEmail = $sendinblue->prepareSendTemplate( $message );
-		$this->assertEquals( $attributes, $sendEmail->getAttributes() );
-
 	}
 
 	public function testCanPrepareMessageTemplateId() {

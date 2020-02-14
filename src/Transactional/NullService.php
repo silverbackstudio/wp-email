@@ -5,6 +5,8 @@ namespace Svbk\WP\Email\Transactional;
 
 class NullService implements ServiceInterface {
 
+	const SERVICE_NAME = 'null';
+
 	/**
 	 * Class constructor.
 	 */
