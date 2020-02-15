@@ -32,22 +32,24 @@ $providerInstance = svbk_email_get_provider();
 if ( $providerInstance && !function_exists( 'wp_mail' ) ) {
 
 	function wp_mail( $to, $subject, $message, $headers = '', $attachments = array() ) {
-	    
+		$options = get_option( 'svbk_email_options' );
+
 	    $wp_email = new Email\Wordpress();
 		$message = $wp_email->message( $to, $subject, $message, $headers = '', $attachments = array() );
 
-		$email_id = Email\Wordpress::$last_email_id;
+		$email_id = Email\Wordpress::get_last_email_id();
 
         $providerInstance = svbk_email_get_provider();
 
         $template_key = 'template_' . $providerInstance::SERVICE_NAME . '_' . $email_id;
-        $template = empty( $options[$template_key]) ? false : $options[$template_key];
-		
+        $template = empty( $options[$template_key] ) ? false : $options[$template_key];
+		$template = apply_filters( 'svbk_email_template', $template );
+
 		$message_id = false;
 
 		try {
 			if ( $template ) {
-				$message_id = $providerInstance->sendTemplate( apply_filters( 'svbk_email_template', $template ), $message, Email\Wordpress::$last_email_data ) ;
+				$message_id = $providerInstance->sendTemplate( $template, $message, Email\Wordpress::$last_email_data ) ;
 			} else {
 				$message_id = $providerInstance->send( $message );
 			}

@@ -251,6 +251,10 @@ class Wordpress {
 		return $params;
 	}
 
+	public static function get_last_email_id(){
+		return self::$last_email_id;
+	}
+
 	// public static function track_password_change_email( $pass_change_email, $user, $userdata ){
 	// self::$last_email_id = 'password_change_email';
 	// self::$last_email_data =  array_merge( self::getCommonData($user), $pass_change_email, $user, $userdata );
@@ -266,6 +270,7 @@ class Wordpress {
 	// self::$last_email_data = $email_data;
 	// self::$last_email_content = $email_text;
 	// }
+
 	public static function clearTracker() {
 		self::$last_email_id = '';
 		self::$last_email_data = null;
