@@ -105,8 +105,7 @@ class SendInBlue implements ServiceInterface {
 				)
 			);
 
-			throw new Exceptions\ServiceError( $error->message );
-
+			throw new Exceptions\ServiceError( $e->getMessage() );
 		} catch ( Exception $e ) {
 
 			do_action(
@@ -117,7 +116,6 @@ class SendInBlue implements ServiceInterface {
 			);
 
 			throw new Exceptions\ServiceError( $e->getMessage() );
-
 		}
 
 		do_action(
