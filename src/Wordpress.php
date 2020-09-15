@@ -199,17 +199,18 @@ class Wordpress {
 	public static function trackedMessages() {
 		return array(
 			'new_user_notification_email' => __( 'New User Welcome', 'svbk-email' ),
-			// 'user_request_action' => __( 'User Request Action', 'svbk-email' ),
-			// 'password_change_email' => __( 'Password Change', 'svbk-email' ),
+			'retrieve_password_message' => __( 'New Password Request', 'svbk-email' ),
 		);
 	}
 
 	public static function trackMessages() {
+		# Email sent to the new user to set it's password
 		add_filter( 'wp_new_user_notification_email' , array( self::class, 'track_wp_new_user_notification_email' ), 10, 3 );
+		# Email set to the user with the password reset link
+		add_filter( 'retrieve_password_message' , array( self::class, 'track_retrieve_password_message' ), 10, 4 );
+		
+		# Helper function to retrieve the password-reset key
 		add_filter( 'retrieve_password_key' , array( self::class, 'store_password_key' ), 10, 3 );
-		// add_filter( 'user_request_action_email_content', array( self::class, 'track_user_request_action' ), 10, 2 );
-		// add_filter( 'password_change_email', array( self::class, 'track_password_change_email' ), 10, 3 );
-		// add_filter( 'email_change_email', array( self::class, 'track_email_change_email' ), 10, 3 );
 	}
 
 	public static function getCommonData( $user = null ) {
@@ -255,21 +256,13 @@ class Wordpress {
 		return self::$last_email_id;
 	}
 
-	// public static function track_password_change_email( $pass_change_email, $user, $userdata ){
-	// self::$last_email_id = 'password_change_email';
-	// self::$last_email_data =  array_merge( self::getCommonData($user), $pass_change_email, $user, $userdata );
-	// self::$last_email_content = $email_text;
-	// }
-	// public static function track_email_change_email( $email_change_email, $user, $userdata ){
-	// self::$last_email_id = 'email_change_email';
-	// self::$last_email_data = $email_data;
-	// self::$last_email_content = $email_text;
-	// }
-	// public static function track_user_request_action( $email_text, $email_data ){
-	// self::$last_email_id = 'user_request_action';
-	// self::$last_email_data = $email_data;
-	// self::$last_email_content = $email_text;
-	// }
+	public static function track_retrieve_password_message( $message, $key, $user_login, $user_data ){
+		self::$last_email_id = 'retrieve_password_message';
+		self::$last_email_data = array_merge( self::$last_email_data, self::getCommonData($user_data) );
+		self::$last_email_content = $message;
+
+		return $message;
+	}
 
 	public static function clearTracker() {
 		self::$last_email_id = '';
