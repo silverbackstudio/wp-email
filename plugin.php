@@ -72,9 +72,14 @@ function svbk_email_get_templates(){
     $result = wp_cache_get( 'svbk_email_templates' );
 
     if ( false === $result ) {
-        $provider = svbk_email_get_provider();
-    	$result = $provider->getTemplates();
-    	wp_cache_set( 'svbk_email_templates', $result, null, 5 * MINUTE_IN_SECONDS );
+		$provider = svbk_email_get_provider();
+		try {
+    		$result = $provider->getTemplates();
+    		wp_cache_set( 'svbk_email_templates', $result, null, 5 * MINUTE_IN_SECONDS );			
+		} catch( \Exception $e) {
+			return false;
+		}
+
     } 
 
 	return $result;
@@ -395,6 +400,11 @@ function svbk_email_field_select_template_cb( $args ) {
 	// output the field
 
     $templates = svbk_email_get_templates();
+
+	if ($templates === false){
+		echo '<p>Invalid API key</p>';
+		return;
+	}
 
 	?>
      <select id="<?php echo esc_attr( $args['label_for'] ); ?>"
