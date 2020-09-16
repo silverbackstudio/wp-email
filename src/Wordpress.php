@@ -206,8 +206,10 @@ class Wordpress {
 	public static function trackMessages() {
 		# Email sent to the new user to set it's password
 		add_filter( 'wp_new_user_notification_email' , array( self::class, 'track_wp_new_user_notification_email' ), 10, 3 );
-		# Email set to the user with the password reset link
+		# Email sent to the user with the password reset link
 		add_filter( 'retrieve_password_message' , array( self::class, 'track_retrieve_password_message' ), 10, 4 );
+		# Email sent to the user (via WooCommerce Account) with the password reset link
+		add_action( 'woocommerce_reset_password_notification' , array( self::class, 'track_wc_retrieve_password_message' ), 9, 2 );
 		
 		# Helper function to retrieve the password-reset key
 		add_filter( 'retrieve_password_key' , array( self::class, 'store_password_key' ), 10, 3 );
@@ -258,10 +260,19 @@ class Wordpress {
 
 	public static function track_retrieve_password_message( $message, $key, $user_login, $user_data ){
 		self::$last_email_id = 'retrieve_password_message';
+		self::store_password_key($user_login, $key);
 		self::$last_email_data = array_merge( self::$last_email_data, self::getCommonData($user_data) );
 		self::$last_email_content = $message;
 
 		return $message;
+	}
+
+	public static function track_wc_retrieve_password_message( $user_login, $key ){
+		self::$last_email_id = 'retrieve_password_message';
+		self::store_password_key($user_login, $key);		
+		$user_data = get_user_by('login', $user_login);
+		self::$last_email_data = array_merge( self::$last_email_data, self::getCommonData($user_data) );
+		self::$last_email_content = '';
 	}
 
 	public static function clearTracker() {
