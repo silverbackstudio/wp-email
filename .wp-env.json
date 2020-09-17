@@ -1,4 +1,7 @@
 {
+    "plugins": [
+        "https://downloads.wordpress.org/plugin/woocommerce.zip"
+    ],
     "mappings": {
         "wp-content/mu-plugins": "./"
     }

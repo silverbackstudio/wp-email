@@ -269,8 +269,10 @@ class Wordpress {
 
 	public static function track_wc_retrieve_password_message( $user_login, $key ){
 		self::$last_email_id = 'retrieve_password_message';
-		self::store_password_key($user_login, $key);		
 		$user_data = get_user_by('login', $user_login);
+		$reset_url = add_query_arg( array( 'key' => $key, 'id' => $user_data->ID ), wc_get_endpoint_url( 'lost-password', '', wc_get_page_permalink( 'myaccount' ) ) );
+		self::$last_email_data['PASSWORD_RESET_LINK'] = $reset_url;
+		self::$last_email_data['WC_PASSWORD_RESET_LINK'] = $reset_url;
 		self::$last_email_data = array_merge( self::$last_email_data, self::getCommonData($user_data) );
 		self::$last_email_content = '';
 	}
