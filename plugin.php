@@ -49,6 +49,7 @@ if ( $providerInstance && !function_exists( 'wp_mail' ) ) {
 
 		try {
 			if ( $template ) {
+				$message->subject = '';
 				$message_id = $providerInstance->sendTemplate( $template, $message, Email\Wordpress::$last_email_data ) ;
 			} else {
 				$message_id = $providerInstance->send( $message );
